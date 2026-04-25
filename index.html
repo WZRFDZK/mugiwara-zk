@@ -1110,18 +1110,21 @@ function afterLogin() {
     if(adminBtnChat) adminBtnChat.style.display='inline-flex';
   }
   applyConfig();
+  loadMusic();
+  tryAutoPlay();
   showPage('home');
 }
 
 function afterAdminLogin() {
   saveSession(currentUser);
-  // Show admin's name in all navs
   document.getElementById('nav-username').textContent = '🛡️ Admin';
   document.getElementById('nav-username-chat').textContent = '🛡️ Admin';
   const adminBtnHome = document.getElementById('nav-admin-btn-home');
   const adminBtnChat = document.getElementById('nav-admin-btn-chat');
   if(adminBtnHome) adminBtnHome.style.display='inline-flex';
   if(adminBtnChat) adminBtnChat.style.display='inline-flex';
+  loadMusic();
+  tryAutoPlay();
   loadAdminPanels();
   showPage('admin');
 }
@@ -1141,9 +1144,10 @@ function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const pages = { login:'page-login', home:'page-home', chat:'page-chat', admin:'page-admin' };
   document.getElementById(pages[name]).classList.add('active');
-  if(name === 'chat') { renderMessages(); startPolling(); loadMusic(); }
-  else if(name === 'home') { applyConfig(); startHomePolling(); }
-  else { stopPolling(); stopHomePolling(); }
+  if(name === 'chat') { renderMessages(); startPolling(); }
+  if(name === 'home') { applyConfig(); startHomePolling(); }
+  if(name !== 'login') { loadMusic(); tryAutoPlay(); }
+  if(name === 'login') { stopPolling(); stopHomePolling(); }
 }
 
 function gotoChat() {
@@ -1337,22 +1341,49 @@ function loadMusic() {
   const url = siteData.config.musicDataUrl || '';
   if(url && url !== lastMusicUrl) {
     audio.src = url;
+    audio.loop = true;
     audio.volume = document.getElementById('vol-slider').value / 100;
     lastMusicUrl = url;
     const name = siteData.config.musicName || '♪ Musique du club';
     document.getElementById('music-track-name').textContent = name;
+    // Si le lecteur était déjà en lecture, relancer automatiquement
+    if(musicPlaying) {
+      audio.play().catch(() => {});
+    }
   }
 }
+
+function tryAutoPlay() {
+  const audio = document.getElementById('bg-audio');
+  if(!audio.src || audio.src === window.location.href) return;
+  if(musicPlaying) return; // déjà en cours
+  audio.play().then(() => {
+    musicPlaying = true;
+    document.getElementById('music-toggle-btn').textContent = '⏸';
+    document.getElementById('music-toggle-btn').classList.add('playing');
+  }).catch(() => {
+    // Navigateur bloque l'autoplay sans interaction — on attend le 1er clic
+    document.addEventListener('click', function startOnClick() {
+      if(!musicPlaying) {
+        audio.play().then(() => {
+          musicPlaying = true;
+          document.getElementById('music-toggle-btn').textContent = '⏸';
+          document.getElementById('music-toggle-btn').classList.add('playing');
+        }).catch(() => {});
+      }
+      document.removeEventListener('click', startOnClick);
+    }, { once: true });
+  });
+}
+
 function updateMusicIfChanged() {
   const url = siteData.config.musicDataUrl || '';
   if(url && url !== lastMusicUrl) {
-    const audio = document.getElementById('bg-audio');
-    audio.src = url;
-    lastMusicUrl = url;
-    const name = siteData.config.musicName || '♪ Musique du club';
-    document.getElementById('music-track-name').textContent = name;
+    loadMusic();
+    tryAutoPlay();
   }
 }
+
 function toggleMusic() {
   const audio = document.getElementById('bg-audio');
   const btn = document.getElementById('music-toggle-btn');
@@ -1363,7 +1394,7 @@ function toggleMusic() {
     audio.pause(); musicPlaying = false;
     btn.textContent = '▶'; btn.classList.remove('playing');
   } else {
-    audio.play().catch(()=>{});
+    audio.play().catch(() => {});
     musicPlaying = true;
     btn.textContent = '⏸'; btn.classList.add('playing');
   }
