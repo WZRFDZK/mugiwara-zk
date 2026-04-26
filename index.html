@@ -257,12 +257,22 @@
     border-radius:12px; overflow:hidden;
     max-width:700px; margin:0 auto;
   }
+  #video-container {
+    position:relative;
+    width:100%;
+  }
+  #video-container iframe {
+    width:100%;
+    aspect-ratio:16/9;
+    display:block;
+    border:none;
+  }
   .video-placeholder {
     display:flex; align-items:center; justify-content:center;
     height:300px; flex-direction:column; gap:1rem; color:#555;
   }
   .video-placeholder p { font-size:0.9rem; }
-  #home-video { width:100%; max-height:400px; display:none; }
+  #home-video { width:100%; display:none; }
 
   /* ─── CHAT ─── */
   #page-chat { position:relative; }
@@ -657,10 +667,12 @@
   <div class="section">
     <div class="section-title">Nous en Action 🎮</div>
     <div class="video-wrap">
-      <video id="home-video" autoplay muted loop playsinline controls>Votre navigateur ne supporte pas la vidéo.</video>
-      <div class="video-placeholder" id="video-placeholder">
-        <span style="font-size:3rem">🎮</span>
-        <p>Vidéo à venir – uploadable depuis le panel Admin</p>
+      <div id="video-container">
+        <video id="home-video" playsinline controls style="width:100%;display:none;">Votre navigateur ne supporte pas la vidéo.</video>
+        <div class="video-placeholder" id="video-placeholder">
+          <span style="font-size:3rem">🎮</span>
+          <p>Vidéo à venir – uploadable depuis le panel Admin</p>
+        </div>
       </div>
     </div>
 
@@ -1208,6 +1220,7 @@ function applyConfig() {
   const videoUrl = c.videoUrl || c.videoDataUrl || '';
   const videoEl = document.getElementById('home-video');
   const placeholder = document.getElementById('video-placeholder');
+  const container = document.getElementById('video-container');
   if(videoUrl) {
     placeholder.style.display = 'none';
     if(isYouTubeUrl(videoUrl)) {
@@ -1217,9 +1230,9 @@ function applyConfig() {
       if(!iframeEl) {
         iframeEl = document.createElement('iframe');
         iframeEl.id = 'home-yt-embed';
-        iframeEl.style.cssText = 'width:100%;aspect-ratio:16/9;display:block;border:none;border-radius:8px;';
         iframeEl.setAttribute('allowfullscreen', '');
-        videoEl.parentNode.insertBefore(iframeEl, videoEl);
+        iframeEl.setAttribute('allow', 'fullscreen');
+        container.insertBefore(iframeEl, videoEl);
       }
       iframeEl.src = `https://www.youtube.com/embed/${id}`;
       iframeEl.style.display = 'block';
