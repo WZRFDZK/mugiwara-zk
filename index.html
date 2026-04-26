@@ -663,6 +663,24 @@
         <p>Vidéo à venir – uploadable depuis le panel Admin</p>
       </div>
     </div>
+
+    <!-- Boutons sociaux -->
+    <div style="display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap;">
+      <a href="https://www.youtube.com/@zakarmrc212/videos" target="_blank"
+        style="display:inline-flex;align-items:center;gap:0.6rem;padding:0.75rem 1.5rem;background:linear-gradient(135deg,#ff0000,#cc0000);color:#fff;border-radius:50px;font-family:'Exo 2',sans-serif;font-weight:700;font-size:0.95rem;text-decoration:none;box-shadow:0 4px 20px rgba(255,0,0,0.4);transition:all 0.3s;"
+        onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 30px rgba(255,0,0,0.6)'"
+        onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(255,0,0,0.4)'">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M23.5 6.2s-.2-1.6-.9-2.3c-.9-1-1.9-1-2.3-1C17.2 2.7 12 2.7 12 2.7s-5.2 0-8.3.2c-.4 0-1.4.1-2.3 1-.7.7-.9 2.3-.9 2.3S.2 8 .2 9.8v1.7c0 1.8.3 3.6.3 3.6s.2 1.6.9 2.3c.9 1 2 .9 2.5 1C5.8 18.6 12 18.7 12 18.7s5.2 0 8.3-.3c.4 0 1.4-.1 2.3-1 .7-.7.9-2.3.9-2.3s.3-1.8.3-3.6V9.8c0-1.8-.3-3.6-.3-3.6zM9.7 14.6V8.3l6.3 3.2-6.3 3.1z"/></svg>
+        YouTube
+      </a>
+      <a href="https://discord.gg/RD4hQHQP7K" target="_blank"
+        style="display:inline-flex;align-items:center;gap:0.6rem;padding:0.75rem 1.5rem;background:linear-gradient(135deg,#5865F2,#4752c4);color:#fff;border-radius:50px;font-family:'Exo 2',sans-serif;font-weight:700;font-size:0.95rem;text-decoration:none;box-shadow:0 4px 20px rgba(88,101,242,0.4);transition:all 0.3s;"
+        onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 30px rgba(88,101,242,0.6)'"
+        onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(88,101,242,0.4)'">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M20.3 4.2A19.7 19.7 0 0 0 15.4 2.7c-.2.4-.5.9-.7 1.3a18.3 18.3 0 0 0-5.4 0C9.1 3.6 8.8 3.1 8.6 2.7A19.8 19.8 0 0 0 3.7 4.2C.5 9 -.3 13.6.1 18.1a19.9 19.9 0 0 0 6 3c.5-.7.9-1.4 1.3-2.2-.7-.3-1.4-.6-2-1l.5-.4a14.2 14.2 0 0 0 12.2 0l.5.4c-.7.4-1.3.7-2 1 .4.8.8 1.5 1.3 2.2a19.8 19.8 0 0 0 6-3c.5-5.1-.8-9.7-3.6-13.9zM8 15.4c-1.2 0-2.1-1.1-2.1-2.4S6.8 10.6 8 10.6s2.1 1.1 2.1 2.4S9.2 15.4 8 15.4zm8 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.1 1.1 2.1 2.4-.9 2.4-2.1 2.4z"/></svg>
+        Discord
+      </a>
+    </div>
   </div>
 </div>
 
@@ -1197,7 +1215,7 @@ function applyConfig() {
       const id = extractYouTubeId(videoUrl);
       if(id && videoWrap) {
         videoEl.style.display = 'none';
-        videoWrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen style="width:100%;aspect-ratio:16/9;display:block;border-radius:8px;"></iframe>`;
+        videoWrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}" frameborder="0" allowfullscreen allow="autoplay" style="width:100%;aspect-ratio:16/9;display:block;border-radius:8px;"></iframe>`;
       } else if(id) {
         videoEl.style.display = 'none';
         // fallback: insert iframe before placeholder
@@ -1209,7 +1227,7 @@ function applyConfig() {
           iframeEl.allowFullscreen = true;
           videoEl.parentNode.insertBefore(iframeEl, videoEl);
         }
-        iframeEl.src = `https://www.youtube.com/embed/${id}`;
+        iframeEl.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}`;
         iframeEl.style.display = 'block';
       }
     } else {
