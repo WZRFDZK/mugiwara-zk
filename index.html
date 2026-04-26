@@ -1062,6 +1062,11 @@ async function doLogin() {
   document.getElementById('login-err').style.display='none';
   closeModal('modal-login');
   currentUser = { name: member.name, email: member.email, isAdmin: false };
+  // S'assurer que les boutons admin sont bien cachés
+  const adminBtnHome = document.getElementById('nav-admin-btn-home');
+  const adminBtnChat = document.getElementById('nav-admin-btn-chat');
+  if(adminBtnHome) adminBtnHome.style.display='none';
+  if(adminBtnChat) adminBtnChat.style.display='none';
   afterLogin();
 }
 
@@ -1141,6 +1146,10 @@ function logout() {
 // NAVIGATION
 // ════════════════════════════════════════
 function showPage(name) {
+  // Bloquer l'accès admin aux non-admins
+  if(name === 'admin' && (!currentUser || !currentUser.isAdmin)) {
+    toast('Accès refusé'); return;
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const pages = { login:'page-login', home:'page-home', chat:'page-chat', admin:'page-admin' };
   document.getElementById(pages[name]).classList.add('active');
