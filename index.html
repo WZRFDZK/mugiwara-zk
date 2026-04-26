@@ -1215,7 +1215,7 @@ function applyConfig() {
       const id = extractYouTubeId(videoUrl);
       if(id && videoWrap) {
         videoEl.style.display = 'none';
-        videoWrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}" frameborder="0" allowfullscreen allow="autoplay" style="width:100%;aspect-ratio:16/9;display:block;border-radius:8px;"></iframe>`;
+        videoWrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1" frameborder="0" allowfullscreen allow="autoplay" style="width:100%;aspect-ratio:16/9;display:block;border-radius:8px;"></iframe>`;
       } else if(id) {
         videoEl.style.display = 'none';
         // fallback: insert iframe before placeholder
@@ -1227,7 +1227,7 @@ function applyConfig() {
           iframeEl.allowFullscreen = true;
           videoEl.parentNode.insertBefore(iframeEl, videoEl);
         }
-        iframeEl.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}`;
+        iframeEl.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1`;
         iframeEl.style.display = 'block';
       }
     } else {
