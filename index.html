@@ -1208,37 +1208,28 @@ function applyConfig() {
   const videoUrl = c.videoUrl || c.videoDataUrl || '';
   const videoEl = document.getElementById('home-video');
   const placeholder = document.getElementById('video-placeholder');
-  const videoWrap = document.getElementById('video-wrap-inner');
   if(videoUrl) {
     placeholder.style.display = 'none';
     if(isYouTubeUrl(videoUrl)) {
       const id = extractYouTubeId(videoUrl);
-      if(id && videoWrap) {
-        videoEl.style.display = 'none';
-        videoWrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1" frameborder="0" allowfullscreen allow="autoplay" style="width:100%;aspect-ratio:16/9;display:block;border-radius:8px;"></iframe>`;
-      } else if(id) {
-        videoEl.style.display = 'none';
-        // fallback: insert iframe before placeholder
-        let iframeEl = document.getElementById('home-yt-embed');
-        if(!iframeEl) {
-          iframeEl = document.createElement('iframe');
-          iframeEl.id = 'home-yt-embed';
-          iframeEl.style.cssText = 'width:100%;aspect-ratio:16/9;display:block;border:none;border-radius:8px;';
-          iframeEl.allowFullscreen = true;
-          videoEl.parentNode.insertBefore(iframeEl, videoEl);
-        }
-        iframeEl.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1`;
-        iframeEl.style.display = 'block';
+      videoEl.style.display = 'none';
+      let iframeEl = document.getElementById('home-yt-embed');
+      if(!iframeEl) {
+        iframeEl = document.createElement('iframe');
+        iframeEl.id = 'home-yt-embed';
+        iframeEl.style.cssText = 'width:100%;aspect-ratio:16/9;display:block;border:none;border-radius:8px;';
+        iframeEl.setAttribute('allowfullscreen', '');
+        videoEl.parentNode.insertBefore(iframeEl, videoEl);
       }
+      iframeEl.src = `https://www.youtube.com/embed/${id}`;
+      iframeEl.style.display = 'block';
     } else {
-      // Direct URL (mp4 etc.)
       const ytEmbed = document.getElementById('home-yt-embed');
       if(ytEmbed) ytEmbed.style.display = 'none';
       videoEl.src = videoUrl;
       videoEl.style.display = 'block';
     }
   } else {
-    // No video: show placeholder, hide everything
     if(placeholder) placeholder.style.display = 'flex';
     videoEl.style.display = 'none';
     const ytEmbed = document.getElementById('home-yt-embed');
