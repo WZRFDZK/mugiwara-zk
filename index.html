@@ -602,6 +602,13 @@
     .sidebar-item.active { border-bottom-color:var(--gold); border-left-color:transparent; }
   }
 </style>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c0392b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MZK">
+<link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
 
@@ -1759,6 +1766,39 @@ function goAdminViewChat() {
     }
   }
 })();
+</script>
+  <script>
+  // Enregistrement du Service Worker (PWA)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/mugiwara-zk/sw.js')
+        .then(reg => console.log('[MZK] Service Worker enregistré ✅', reg.scope))
+        .catch(err => console.warn('[MZK] Service Worker échoué ❌', err));
+    });
+  }
+ 
+  // Bouton d'installation PWA (optionnel – affiche une bannière custom)
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+ 
+    // Crée un bouton "Installer l'app" si tu veux l'afficher sur la page
+    const btn = document.getElementById('install-btn');
+    if (btn) {
+      btn.style.display = 'block';
+      btn.addEventListener('click', () => {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(choice => {
+          if (choice.outcome === 'accepted') {
+            console.log('[MZK] App installée 🎉');
+          }
+          deferredPrompt = null;
+          btn.style.display = 'none';
+        });
+      });
+    }
+  });
 </script>
 </body>
 </html>
