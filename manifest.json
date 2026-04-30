@@ -1,0 +1,35 @@
+{
+  "name": "Mugiwara No ZK",
+  "short_name": "MZK",
+  "description": "Club Brawl Stars – Mugiwara No ZK",
+  "start_url": "/mugiwara-zk/",
+  "scope": "/mugiwara-zk/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
+  "theme_color": "#c0392b",
+  "lang": "fr",
+  "categories": ["games", "social"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Chat Membres",
+      "url": "/mugiwara-zk/#chat",
+      "description": "Accéder au chat"
+    }
+  ]
+}
