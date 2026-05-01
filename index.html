@@ -1343,9 +1343,19 @@ body.is-admin .show-admin { display: flex; }
    STATE
 ═══════════════════════════════════ */
 let currentUser = null;
-let isAdmin = false;
+let isAdmin = localStorage.getItem('mzk_admin') === 'true';
 let badWords = [];
 let chatListener = null;
+
+// Restore admin UI dès le chargement si session sauvegardée
+if (isAdmin) {
+  document.addEventListener('DOMContentLoaded', () => {
+    const adminBtn = document.getElementById('bnav-admin');
+    const chatBtn  = document.getElementById('btn-go-chat');
+    if (adminBtn) adminBtn.style.display = 'flex';
+    if (chatBtn)  chatBtn.style.display  = 'inline-flex';
+  });
+}
 
 /* ═══════════════════════════════════
    VIEWS
@@ -1357,8 +1367,19 @@ function switchView(v) {
   const map = { splash: 'view-splash', chat: 'view-chat', admin: 'view-admin' };
   const navMap = { splash: 'bnav-home', chat: 'bnav-chat', admin: 'bnav-admin' };
 
+  // Admin accède à tout sans restriction
+  if (isAdmin) {
+    document.getElementById(map[v]).classList.add('active');
+    const nb = document.getElementById(navMap[v]);
+    if (nb) nb.classList.add('active');
+    if (v === 'chat') loadChat();
+    if (v === 'admin') loadAdminData();
+    return;
+  }
+
+  // Membres : chat nécessite connexion Firebase
   if (v === 'chat' && !currentUser) { openModal('login'); return; }
-  if (v === 'admin' && !isAdmin) { openModal('admin-login'); return; }
+  if (v === 'admin') { openModal('admin-login'); return; }
 
   document.getElementById(map[v]).classList.add('active');
   const nb = document.getElementById(navMap[v]);
@@ -1444,8 +1465,10 @@ async function doAdminLogin() {
 
   if (id === 'mugiwara-admin' && email === 'zkouaz89@gmail.com' && pass === 'Zakar_89') {
     isAdmin = true;
+    localStorage.setItem('mzk_admin', 'true');
     closeModal('admin-login');
     document.getElementById('bnav-admin').style.display = 'flex';
+    document.getElementById('btn-go-chat').style.display = 'inline-flex';
     switchView('admin');
     loadAdminData();
     showToast('Accès admin accordé 🛡️');
@@ -1457,13 +1480,18 @@ async function doAdminLogin() {
 
 function doLogout() {
   const { auth, signOut } = window._fb;
-  signOut(auth);
+  signOut(auth).catch(()=>{});
   currentUser = null;
   isAdmin = false;
+  localStorage.removeItem('mzk_admin');
   document.body.classList.remove('logged-in');
   document.getElementById('bnav-admin').style.display = 'none';
   document.getElementById('btn-go-chat').style.display = 'none';
-  switchView('splash');
+  // Reset nav
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-splash').classList.add('active');
+  document.querySelectorAll('.bnav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('bnav-home').classList.add('active');
   showToast('Déconnecté 👋');
 }
 
@@ -1474,15 +1502,7 @@ window.addEventListener('load', () => {
     currentUser = user;
     if (user) {
       document.body.classList.add('logged-in');
-      // Check if admin
-      try {
-        const snap = await get(ref(db, 'admins/' + user.uid));
-        if (snap.exists()) {
-          isAdmin = true;
-          document.getElementById('bnav-admin').style.display = 'flex';
-        }
-      } catch(e) {}
-      // Get pseudo
+      // Récupère le pseudo
       try {
         const snap = await get(ref(db, 'users/' + user.uid));
         if (snap.exists()) {
@@ -1491,9 +1511,14 @@ window.addEventListener('load', () => {
         }
       } catch(e) {}
       document.getElementById('btn-go-chat').style.display = 'inline-flex';
-    } else {
+    } else if (!isAdmin) {
       document.body.classList.remove('logged-in');
       document.getElementById('btn-go-chat').style.display = 'none';
+    }
+    // Restore admin nav si session active
+    if (isAdmin) {
+      document.getElementById('bnav-admin').style.display = 'flex';
+      document.getElementById('btn-go-chat').style.display = 'inline-flex';
     }
     // Load public data
     loadPublicData();
