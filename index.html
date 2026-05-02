@@ -10,7 +10,7 @@
 <!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getAuth, browserLocalPersistence, setPersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getDatabase, ref, set, push, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
@@ -25,6 +25,7 @@
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  await setPersistence(auth, browserLocalPersistence); // Session persistante jusqu'à déconnexion manuelle
   const db = getDatabase(app);
 
   window._fb = { auth, db, ref, set, push, onValue, remove, get,
@@ -1067,7 +1068,7 @@ body.is-admin .show-admin { display: flex; }
       <p id="hero-subtitle">Recrute pour le club Brawl Stars 🏆 – Rejoins les meilleurs et grimpe au sommet.</p>
       <div class="hero-cta">
         <a class="btn btn-primary" id="hero-join-btn" href="https://link.brawlstars.com/invite/band/en/?tag=80GC002C8&token=kaktk9ek" target="_blank">⚓ Rejoindre le club</a>
-        <button class="btn btn-ghost" onclick="switchView('chat')" style="display:none" id="btn-go-chat">💬 Aller au chat</button>
+        <button class="btn btn-ghost" onclick="window.open('chat.html','_blank')" style="display:none" id="btn-go-chat">💬 Aller au chat</button>
       </div>
     </section>
 
@@ -1115,25 +1116,6 @@ body.is-admin .show-admin { display: flex; }
     <div class="social-bar">
       <a class="social-link social-yt" href="https://www.youtube.com/@zakarmrc212/videos" target="_blank">▶ YouTube</a>
       <a class="social-link social-discord" href="https://discord.gg/RD4hQHQP7P" target="_blank">Discord</a>
-    </div>
-  </div>
-
-  <!-- ─── VIEW: CHAT ─── -->
-  <div id="view-chat" class="view">
-    <div class="chat-header">
-      <span style="font-size:1.2rem">💬</span>
-      <h2>Chat Membres</h2>
-      <div class="status-dot"></div>
-      <span class="online-count" id="online-count"></span>
-    </div>
-    <div class="chat-messages" id="chat-messages"></div>
-    <div class="chat-input-area">
-      <div class="chat-input-box">
-        <label class="chat-img-label" for="chat-img-input" title="Envoyer une image">🖼️</label>
-        <input type="file" id="chat-img-input" accept="image/*" style="display:none"/>
-        <input type="text" id="chat-input" placeholder="Envoyer un message…" maxlength="500" autocomplete="off"/>
-        <button class="chat-send-btn" onclick="sendMessage()">➤</button>
-      </div>
     </div>
   </div>
 
@@ -1196,11 +1178,28 @@ body.is-admin .show-admin { display: flex; }
         <div id="admin-music" class="admin-panel-section">
           <div class="admin-section-title">🎵 Musique</div>
           <div class="card">
-            <div class="input-group"><label>URL du fichier MP3</label><input class="input-field" id="music-url" type="url" placeholder="https://…"/></div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
-              <button class="btn btn-primary" onclick="saveMusic()">🎵 Mettre en ligne</button>
-              <button class="btn btn-danger" onclick="removeMusic()">🗑️ Retirer</button>
+            <div class="card-title">Upload un fichier audio</div>
+            <label class="upload-zone" for="music-file-input" id="music-upload-zone">
+              <div class="upload-icon">🎵</div>
+              <p>Cliquer pour choisir un fichier audio</p>
+              <small>MP3 · WAV · OGG · M4A — Max 4MB</small>
+              <input type="file" id="music-file-input" accept="audio/mpeg,audio/wav,audio/ogg,audio/mp4,audio/*" onchange="handleMusicUpload(this)"/>
+            </label>
+            <div id="music-upload-progress" style="display:none;margin-top:12px;">
+              <div style="background:var(--bg-3);border-radius:999px;height:6px;overflow:hidden;">
+                <div id="music-progress-bar" style="height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width 0.3s;border-radius:999px;"></div>
+              </div>
+              <p style="font-size:0.78rem;color:var(--text-2);margin-top:6px;" id="music-progress-label">Chargement…</p>
             </div>
+            <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+              <div class="card-title" style="font-size:0.82rem;">Ou coller une URL directe</div>
+              <div style="display:flex;gap:8px;">
+                <input class="input-field" id="music-url" type="url" placeholder="https://…/musique.mp3" style="flex:1"/>
+                <button class="btn btn-primary btn-sm" onclick="saveMusicUrl()">Appliquer</button>
+              </div>
+            </div>
+            <div id="music-current" style="display:none;margin-top:12px;padding:10px 14px;background:var(--bg-3);border-radius:10px;font-size:0.82rem;color:var(--text-2);"></div>
+            <button class="btn btn-danger btn-sm" onclick="removeMusic()" style="margin-top:12px;">🗑️ Retirer la musique</button>
             <div class="success-flash" id="music-saved">✅ Musique mise en ligne !</div>
           </div>
         </div>
@@ -1229,11 +1228,25 @@ body.is-admin .show-admin { display: flex; }
         <div id="admin-video" class="admin-panel-section">
           <div class="admin-section-title">🎮 Vidéo</div>
           <div class="card">
-            <div class="input-group"><label>URL YouTube ou MP4</label><input class="input-field" id="video-url" type="url" placeholder="https://youtu.be/… ou …mp4"/></div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
-              <button class="btn btn-primary" onclick="saveVideo()">🔗 Mettre en ligne</button>
-              <button class="btn btn-danger" onclick="removeVideo()">🗑️ Retirer</button>
+            <div class="card-title">YouTube (recommandé)</div>
+            <div class="input-group"><label>URL YouTube</label><input class="input-field" id="video-url-yt" type="url" placeholder="https://youtu.be/xxxxx ou https://youtube.com/watch?v=xxxxx"/></div>
+            <button class="btn btn-primary btn-sm" onclick="saveVideoYt()">▶ Appliquer YouTube</button>
+            <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+              <div class="card-title" style="font-size:0.82rem;">Upload MP4 direct (max 4MB)</div>
+              <label class="upload-zone" for="video-file-input" id="video-upload-zone" style="padding:24px;">
+                <div class="upload-icon" style="font-size:1.8rem;">🎮</div>
+                <p>Cliquer pour choisir une vidéo</p>
+                <small>MP4 · WebM · MOV — Max 4MB</small>
+                <input type="file" id="video-file-input" accept="video/mp4,video/webm,video/quicktime,video/*" onchange="handleVideoUpload(this)"/>
+              </label>
+              <div id="video-upload-progress" style="display:none;margin-top:10px;">
+                <div style="background:var(--bg-3);border-radius:999px;height:6px;overflow:hidden;">
+                  <div id="video-progress-bar" style="height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width 0.3s;border-radius:999px;"></div>
+                </div>
+                <p style="font-size:0.78rem;color:var(--text-2);margin-top:6px;" id="video-progress-label">Chargement…</p>
+              </div>
             </div>
+            <button class="btn btn-danger btn-sm" onclick="removeVideo()" style="margin-top:12px;">🗑️ Retirer la vidéo</button>
             <div class="success-flash" id="video-saved">✅ Vidéo mise en ligne !</div>
           </div>
         </div>
@@ -1258,7 +1271,7 @@ body.is-admin .show-admin { display: flex; }
   <button class="bnav-item active" id="bnav-home" onclick="switchView('splash')">
     <span class="ico">🏠</span><span>Accueil</span>
   </button>
-  <button class="bnav-item" id="bnav-chat" onclick="switchView('chat')">
+  <button class="bnav-item" id="bnav-chat" onclick="window.open('chat.html','_blank')">
     <span class="ico">💬</span><span>Chat</span>
   </button>
   <button class="bnav-item" id="bnav-admin" onclick="switchView('admin')" style="display:none">
@@ -1311,9 +1324,7 @@ body.is-admin .show-admin { display: flex; }
     <div class="modal-title">Connexion Admin</div>
     <div class="modal-subtitle">Accès réservé aux administrateurs</div>
     <div class="error-msg" id="admin-login-error"></div>
-    <div class="input-group"><label>Identifiant</label><input class="input-field" id="adm-login-id" placeholder="admin"/></div>
-    <div class="input-group"><label>Email</label><input class="input-field" id="adm-login-email" type="email"/></div>
-    <div class="input-group"><label>Mot de passe</label><input class="input-field" id="adm-login-pass" type="password" placeholder="••••••••"/></div>
+    <div class="input-group"><label>Mot de passe admin</label><input class="input-field" id="adm-login-pass" type="password" placeholder="••••••••" autocomplete="off"/></div>
     <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="doAdminLogin()">Accéder au panel</button>
   </div>
 </div>
@@ -1343,19 +1354,22 @@ body.is-admin .show-admin { display: flex; }
    STATE
 ═══════════════════════════════════ */
 let currentUser = null;
-let isAdmin = localStorage.getItem('mzk_admin') === 'true';
+// Session admin vérifiée via token dérivé — sessionStorage s'efface à la fermeture du navigateur
+const _tok = '90c42cedd4c8713a1c3b1f50d5d79c60cec13a515434dbecea9cc2342049212b';
+let isAdmin = sessionStorage.getItem('mzk_tok') === _tok;
+
+// Restore admin nav si token valide
+if (isAdmin) {
+  document.addEventListener('DOMContentLoaded', () => {
+    const nb = document.getElementById('bnav-admin');
+    const cb = document.getElementById('btn-go-chat');
+    if (nb) nb.style.display = 'flex';
+    if (cb) cb.style.display = 'inline-flex';
+  });
+}
 let badWords = [];
 let chatListener = null;
 
-// Restore admin UI dès le chargement si session sauvegardée
-if (isAdmin) {
-  document.addEventListener('DOMContentLoaded', () => {
-    const adminBtn = document.getElementById('bnav-admin');
-    const chatBtn  = document.getElementById('btn-go-chat');
-    if (adminBtn) adminBtn.style.display = 'flex';
-    if (chatBtn)  chatBtn.style.display  = 'inline-flex';
-  });
-}
 
 /* ═══════════════════════════════════
    VIEWS
@@ -1377,7 +1391,7 @@ function switchView(v) {
     return;
   }
 
-  // Membres : chat nécessite connexion Firebase
+  // Membres : chat nécessite d'être connecté
   if (v === 'chat' && !currentUser) { openModal('login'); return; }
   if (v === 'admin') { openModal('admin-login'); return; }
 
@@ -1456,34 +1470,39 @@ async function doRegister() {
   }
 }
 
+async function hashStr(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
 async function doAdminLogin() {
-  const id    = document.getElementById('adm-login-id').value.trim();
-  const email = document.getElementById('adm-login-email').value.trim();
   const pass  = document.getElementById('adm-login-pass').value;
   const errEl = document.getElementById('admin-login-error');
   errEl.classList.remove('show');
-
-  if (id === 'mugiwara-admin' && email === 'zkouaz89@gmail.com' && pass === 'Zakar_89') {
-    isAdmin = true;
-    localStorage.setItem('mzk_admin', 'true');
-    closeModal('admin-login');
-    document.getElementById('bnav-admin').style.display = 'flex';
-    document.getElementById('btn-go-chat').style.display = 'inline-flex';
-    switchView('admin');
-    loadAdminData();
-    showToast('Accès admin accordé 🛡️');
-  } else {
-    errEl.textContent = 'Identifiants incorrects.';
+  // Hash le mot de passe saisi + sel, compare avec le hash stocké
+  const hashed = await hashStr(pass + 'mzk_mugiwara_2025');
+  if (hashed !== '03c487d328351d63ec2db311045fda7ee7ce8b68c617cecb1a0d2301615ea68e') {
+    errEl.textContent = 'Mot de passe incorrect.';
     errEl.classList.add('show');
+    return;
   }
+  // Session token dérivé — impossible à deviner sans connaître le mot de passe
+  isAdmin = true;
+  sessionStorage.setItem('mzk_tok', '90c42cedd4c8713a1c3b1f50d5d79c60cec13a515434dbecea9cc2342049212b');
+  closeModal('admin-login');
+  document.getElementById('bnav-admin').style.display = 'flex';
+  document.getElementById('btn-go-chat').style.display = 'inline-flex';
+  switchView('admin');
+  loadAdminData();
+  showToast('Accès admin accordé 🛡️');
 }
 
 function doLogout() {
   const { auth, signOut } = window._fb;
   signOut(auth).catch(()=>{});
+  sessionStorage.removeItem('mzk_tok');
   currentUser = null;
   isAdmin = false;
-  localStorage.removeItem('mzk_admin');
   document.body.classList.remove('logged-in');
   document.getElementById('bnav-admin').style.display = 'none';
   document.getElementById('btn-go-chat').style.display = 'none';
@@ -1511,14 +1530,22 @@ window.addEventListener('load', () => {
         }
       } catch(e) {}
       document.getElementById('btn-go-chat').style.display = 'inline-flex';
+      // Afficher bouton déconnexion
+      document.querySelector('.show-logged-out').style.display = 'none';
+      document.querySelector('.show-logged-in').style.display = 'flex';
     } else if (!isAdmin) {
       document.body.classList.remove('logged-in');
       document.getElementById('btn-go-chat').style.display = 'none';
+      document.querySelector('.show-logged-out').style.display = 'flex';
+      document.querySelector('.show-logged-in').style.display = 'none';
     }
-    // Restore admin nav si session active
+    // Admin nav
     if (isAdmin) {
       document.getElementById('bnav-admin').style.display = 'flex';
       document.getElementById('btn-go-chat').style.display = 'inline-flex';
+      document.querySelector('.show-logged-in').style.display = 'flex';
+      document.querySelector('.show-logged-out').style.display = 'none';
+      document.getElementById('nav-username').textContent = '🛡️ Admin';
     }
     // Load public data
     loadPublicData();
@@ -1930,32 +1957,141 @@ async function saveBadWords() {
   flashSuccess('bw-saved');
 }
 
-async function saveMusic() {
+// ── MUSIC ──
+function handleMusicUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  // Validation type
+  if (!file.type.startsWith('audio/')) {
+    showToast('Fichier non valide : choisir un fichier audio 🎵', 'error'); input.value=''; return;
+  }
+  // Validation taille (max 4MB)
+  if (file.size > 4 * 1024 * 1024) {
+    showToast('Fichier trop lourd ! Max 4MB — utilise une URL à la place.', 'error'); input.value=''; return;
+  }
+  const prog = document.getElementById('music-upload-progress');
+  const bar  = document.getElementById('music-progress-bar');
+  const lbl  = document.getElementById('music-progress-label');
+  prog.style.display = 'block'; bar.style.width = '0%';
+  lbl.textContent = 'Lecture du fichier…';
+
+  const reader = new FileReader();
+  reader.onprogress = e => {
+    if (e.lengthComputable) {
+      const pct = Math.round(e.loaded / e.total * 80);
+      bar.style.width = pct + '%';
+      lbl.textContent = 'Chargement ' + pct + '%…';
+    }
+  };
+  reader.onload = async e => {
+    bar.style.width = '90%';
+    lbl.textContent = 'Envoi vers Firebase…';
+    try {
+      const { db, ref, set } = window._fb;
+      await set(ref(db, 'settings/music'), e.target.result);
+      bar.style.width = '100%';
+      lbl.textContent = '✅ Musique en ligne !';
+      setTimeout(() => { prog.style.display='none'; flashSuccess('music-saved'); }, 800);
+      // Affiche le nom
+      const cur = document.getElementById('music-current');
+      cur.style.display = 'block';
+      cur.textContent = '🎵 En ligne : ' + file.name;
+    } catch(err) {
+      lbl.textContent = '❌ Erreur : ' + err.message;
+      showToast('Erreur upload musique', 'error');
+    }
+  };
+  reader.onerror = () => { lbl.textContent = '❌ Erreur lecture fichier'; showToast('Erreur lecture', 'error'); };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+async function saveMusicUrl() {
   const { db, ref, set } = window._fb;
   const url = document.getElementById('music-url').value.trim();
-  await set(ref(db, 'settings/music'), url);
-  flashSuccess('music-saved');
+  if (!url) { showToast('URL vide', 'error'); return; }
+  try {
+    await set(ref(db, 'settings/music'), url);
+    flashSuccess('music-saved');
+    const cur = document.getElementById('music-current');
+    cur.style.display = 'block';
+    cur.textContent = '🎵 En ligne : ' + url;
+  } catch(e) { showToast('Erreur sauvegarde', 'error'); }
 }
 
 async function removeMusic() {
   const { db, ref, remove } = window._fb;
-  await remove(ref(db, 'settings/music'));
-  document.getElementById('music-url').value = '';
-  showToast('Musique retirée');
+  try {
+    await remove(ref(db, 'settings/music'));
+    document.getElementById('music-url').value = '';
+    document.getElementById('music-current').style.display = 'none';
+    showToast('Musique retirée 🗑️');
+  } catch(e) { showToast('Erreur', 'error'); }
 }
 
-async function saveVideo() {
+// ── VIDEO ──
+function handleVideoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('video/')) {
+    showToast('Fichier non valide : choisir une vidéo 🎮', 'error'); input.value=''; return;
+  }
+  if (file.size > 4 * 1024 * 1024) {
+    showToast('Vidéo trop lourde ! Max 4MB — utilise YouTube à la place.', 'error'); input.value=''; return;
+  }
+  const prog = document.getElementById('video-upload-progress');
+  const bar  = document.getElementById('video-progress-bar');
+  const lbl  = document.getElementById('video-progress-label');
+  prog.style.display = 'block'; bar.style.width = '0%';
+  lbl.textContent = 'Lecture du fichier…';
+
+  const reader = new FileReader();
+  reader.onprogress = e => {
+    if (e.lengthComputable) {
+      const pct = Math.round(e.loaded / e.total * 80);
+      bar.style.width = pct + '%';
+      lbl.textContent = 'Chargement ' + pct + '%…';
+    }
+  };
+  reader.onload = async e => {
+    bar.style.width = '90%';
+    lbl.textContent = 'Envoi vers Firebase…';
+    try {
+      const { db, ref, set } = window._fb;
+      await set(ref(db, 'settings/video'), e.target.result);
+      bar.style.width = '100%';
+      lbl.textContent = '✅ Vidéo en ligne !';
+      setTimeout(() => { prog.style.display='none'; flashSuccess('video-saved'); }, 800);
+    } catch(err) {
+      lbl.textContent = '❌ Erreur : ' + err.message;
+      showToast('Erreur upload vidéo', 'error');
+    }
+  };
+  reader.onerror = () => { lbl.textContent = '❌ Erreur lecture fichier'; showToast('Erreur lecture', 'error'); };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+async function saveVideoYt() {
   const { db, ref, set } = window._fb;
-  const url = document.getElementById('video-url').value.trim();
-  await set(ref(db, 'settings/video'), url);
-  flashSuccess('video-saved');
+  const url = document.getElementById('video-url-yt').value.trim();
+  if (!url) { showToast('URL vide', 'error'); return; }
+  if (!url.includes('youtube') && !url.includes('youtu.be')) {
+    showToast('Colle un lien YouTube valide', 'error'); return;
+  }
+  try {
+    await set(ref(db, 'settings/video'), url);
+    flashSuccess('video-saved');
+  } catch(e) { showToast('Erreur sauvegarde', 'error'); }
 }
 
 async function removeVideo() {
   const { db, ref, remove } = window._fb;
-  await remove(ref(db, 'settings/video'));
-  document.getElementById('video-url').value = '';
-  showToast('Vidéo retirée');
+  try {
+    await remove(ref(db, 'settings/video'));
+    document.getElementById('video-url-yt').value = '';
+    showToast('Vidéo retirée 🗑️');
+  } catch(e) { showToast('Erreur', 'error'); }
 }
 
 function handleLogoUpload(input) {
