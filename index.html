@@ -6,6 +6,8 @@
 <title>Mugiwara No ZK – Brawl Stars</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<!-- EmailJS pour l'envoi de codes de vérification -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -69,27 +71,19 @@ body{
   overflow-x:hidden;
 }
 
-/* ══════════════════════════════════════
-   NOISE OVERLAY
-══════════════════════════════════════ */
 body::before{
   content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
   opacity:0.03;
 }
 
-/* ══════════════════════════════════════
-   LAYOUT SHELL
-══════════════════════════════════════ */
 #shell{
   position:relative;z-index:1;
   min-height:100vh;
   display:flex;flex-direction:column;
 }
 
-/* ══════════════════════════════════════
-   TOPBAR
-══════════════════════════════════════ */
+/* ══ TOPBAR ══ */
 .topbar{
   position:sticky;top:0;z-index:200;
   display:flex;align-items:center;
@@ -108,7 +102,7 @@ body::before{
   width:34px;height:34px;border-radius:10px;
   background:linear-gradient(135deg,var(--gold),var(--gold2));
   display:flex;align-items:center;justify-content:center;
-  font-size:1.1rem;
+  font-size:1.1rem;overflow:hidden;
 }
 .topbar-nav{display:flex;align-items:center;gap:4px;}
 .tnav-btn{
@@ -122,17 +116,14 @@ body::before{
 .tnav-btn.active{background:var(--c3);color:var(--text);}
 .tnav-btn .dot{
   width:6px;height:6px;border-radius:50%;
-  background:var(--green);
-  box-shadow:0 0 6px var(--green);
-  display:none;
+  background:var(--green);box-shadow:0 0 6px var(--green);display:none;
 }
 .tnav-btn.active .dot{display:block;}
 .topbar-sep{width:1px;height:20px;background:var(--border);margin:0 8px;}
 .topbar-user{
   display:none;align-items:center;gap:8px;
   padding:5px 10px;border-radius:8px;
-  background:var(--c3);
-  font-size:.82rem;font-weight:600;cursor:pointer;
+  background:var(--c3);font-size:.82rem;font-weight:600;cursor:pointer;
 }
 .topbar-user.show{display:flex;}
 .topbar-user .av{
@@ -156,16 +147,11 @@ body::before{
 .btn-danger{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.15);}
 .btn-danger:hover{background:rgba(239,68,68,.2);}
 
-/* ══════════════════════════════════════
-   PAGES
-══════════════════════════════════════ */
+/* ══ PAGES ══ */
 .page{display:none;flex:1;}
 .page.show{display:flex;flex-direction:column;}
 
-/* ══════════════════════════════════════
-   HOME PAGE
-══════════════════════════════════════ */
-/* HERO */
+/* ══ HOME ══ */
 .hero{
   position:relative;overflow:hidden;
   display:flex;flex-direction:column;align-items:center;
@@ -202,8 +188,7 @@ body::before{
   border-radius:999px;padding:5px 16px;
   font-size:.74rem;font-weight:700;letter-spacing:.08em;
   text-transform:uppercase;color:var(--gold);
-  margin-bottom:24px;
-  animation:fadeUp .5s .1s ease both;
+  margin-bottom:24px;animation:fadeUp .5s .1s ease both;
 }
 .hero-pill .blink{
   width:7px;height:7px;border-radius:50%;background:var(--gold);
@@ -231,12 +216,7 @@ body::before{
   justify-content:center;margin-top:36px;
   animation:fadeUp .5s .25s ease both;
 }
-
-/* FEATURES GRID */
-.features{
-  padding:80px 24px;
-  max-width:960px;margin:0 auto;width:100%;
-}
+.features{padding:80px 24px;max-width:960px;margin:0 auto;width:100%;}
 .section-eyebrow{
   font-size:.72rem;font-weight:700;letter-spacing:.1em;
   text-transform:uppercase;color:var(--gold);margin-bottom:10px;
@@ -246,9 +226,7 @@ body::before{
   font-size:clamp(1.6rem,3.5vw,2.2rem);
   font-weight:800;margin-bottom:36px;
 }
-.feat-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;
-}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
 .feat-card{
   background:var(--c2);border:1px solid var(--border);border-radius:var(--r2);
   padding:26px 22px;position:relative;overflow:hidden;
@@ -264,12 +242,7 @@ body::before{
 .feat-ico{font-size:1.8rem;margin-bottom:14px;}
 .feat-card h3{font-family:var(--font-h);font-size:.95rem;font-weight:700;margin-bottom:5px;}
 .feat-card p{font-size:.83rem;color:var(--dim);line-height:1.5;}
-
-/* VIDEO */
-.vid-section{
-  padding:0 24px 80px;
-  max-width:960px;margin:0 auto;width:100%;
-}
+.vid-section{padding:0 24px 80px;max-width:960px;margin:0 auto;width:100%;}
 .vid-wrap{
   background:var(--c2);border:1px solid var(--border);
   border-radius:var(--r2);overflow:hidden;
@@ -277,42 +250,27 @@ body::before{
   display:flex;align-items:center;justify-content:center;
 }
 .vid-wrap iframe,.vid-wrap video{width:100%;height:100%;border:none;}
-.vid-placeholder{
-  display:flex;flex-direction:column;align-items:center;gap:12px;
-  color:var(--faint);
-}
+.vid-placeholder{display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--faint);}
 .vid-placeholder .ico{font-size:2.5rem;}
 .vid-placeholder p{font-size:.85rem;}
-
-/* SOCIALS */
-.socials{
-  display:flex;justify-content:center;gap:12px;
-  padding:0 24px 100px;flex-wrap:wrap;
-}
+.socials{display:flex;justify-content:center;gap:12px;padding:0 24px 100px;flex-wrap:wrap;}
 .soc-btn{
   display:inline-flex;align-items:center;gap:8px;
   padding:10px 22px;border-radius:10px;
-  font-size:.84rem;font-weight:600;text-decoration:none;
-  transition:all .15s;
+  font-size:.84rem;font-weight:600;text-decoration:none;transition:all .15s;
 }
 .soc-yt{background:rgba(255,0,0,.1);color:#ff4444;border:1px solid rgba(255,0,0,.15);}
 .soc-yt:hover{background:rgba(255,0,0,.18);}
 .soc-dc{background:rgba(88,101,242,.1);color:#7289da;border:1px solid rgba(88,101,242,.15);}
 .soc-dc:hover{background:rgba(88,101,242,.2);}
 
-/* ══════════════════════════════════════
-   CHAT PAGE
-══════════════════════════════════════ */
+/* ══ CHAT ══ */
 #page-chat{
   position:fixed;inset:0;top:58px;
-  display:none;
-  flex-direction:column;
-  background:var(--c0);
-  z-index:100;
+  display:none;flex-direction:column;
+  background:var(--c0);z-index:100;
 }
 #page-chat.show{display:flex;}
-
-/* Chat header */
 .chat-hdr{
   display:flex;align-items:center;gap:10px;
   padding:0 20px;height:50px;flex-shrink:0;
@@ -330,12 +288,9 @@ body::before{
   display:flex;align-items:center;gap:5px;
   background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.15);
   border-radius:999px;padding:3px 10px;
-  font-size:.72rem;font-weight:600;color:var(--green);
-  margin-left:auto;
+  font-size:.72rem;font-weight:600;color:var(--green);margin-left:auto;
 }
 .online-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);}
-
-/* Messages area */
 .chat-msgs{
   flex:1;overflow-y:auto;
   padding:16px 0;display:flex;flex-direction:column;
@@ -344,13 +299,7 @@ body::before{
 .chat-msgs::-webkit-scrollbar{width:6px;}
 .chat-msgs::-webkit-scrollbar-track{background:transparent;}
 .chat-msgs::-webkit-scrollbar-thumb{background:var(--c5);border-radius:6px;}
-
-/* Welcome in chat */
-.chat-welcome{
-  padding:20px 20px 28px;
-  border-bottom:1px solid var(--border);
-  margin-bottom:8px;
-}
+.chat-welcome{padding:20px 20px 28px;border-bottom:1px solid var(--border);margin-bottom:8px;}
 .chat-welcome-ico{
   width:56px;height:56px;border-radius:16px;
   background:linear-gradient(135deg,var(--gold),var(--gold2));
@@ -359,37 +308,27 @@ body::before{
 }
 .chat-welcome h3{font-family:var(--font-h);font-size:1.2rem;font-weight:800;margin-bottom:5px;}
 .chat-welcome p{font-size:.83rem;color:var(--dim);line-height:1.5;max-width:400px;}
-
-/* Date separator */
 .date-sep{
   display:flex;align-items:center;gap:10px;
-  padding:6px 20px;
-  font-size:.7rem;font-weight:600;color:var(--faint);
+  padding:6px 20px;font-size:.7rem;font-weight:600;color:var(--faint);
   text-transform:uppercase;letter-spacing:.04em;
 }
 .date-sep::before,.date-sep::after{content:'';flex:1;height:1px;background:var(--border);}
-
-/* Message group */
 .mg{padding:2px 20px;position:relative;transition:background .08s;}
 .mg:hover{background:rgba(255,255,255,.015);}
 .mg.ng{margin-top:18px;}
 .mg.ng .mg-av{display:flex;}
-.mg-av{
-  display:none;position:absolute;top:2px;left:20px;
-}
+.mg-av{display:none;position:absolute;top:2px;left:20px;}
 .av-circ{
   width:38px;height:38px;border-radius:50%;
   background:linear-gradient(135deg,var(--gold),var(--gold2));
   display:flex;align-items:center;justify-content:center;
-  font-size:.85rem;font-weight:700;color:white;
-  cursor:default;flex-shrink:0;
+  font-size:.85rem;font-weight:700;color:white;cursor:default;flex-shrink:0;
 }
 .av-circ.av-adm{background:linear-gradient(135deg,#818cf8,#6366f1);}
 .mg-body{padding-left:54px;min-width:0;position:relative;}
 .mg-hdr{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
-.mg-name{
-  font-size:.9rem;font-weight:700;color:var(--text);cursor:default;
-}
+.mg-name{font-size:.9rem;font-weight:700;color:var(--text);cursor:default;}
 .mg-name.adm{color:#a5b4fc;}
 .mg-badge{
   font-size:.6rem;font-weight:700;letter-spacing:.05em;
@@ -398,24 +337,16 @@ body::before{
 }
 .mg-time{font-size:.68rem;color:var(--faint);}
 .ts-hover{
-  display:none;position:absolute;
-  left:-44px;top:4px;width:38px;text-align:right;
-  font-size:.65rem;color:var(--faint);
+  display:none;position:absolute;left:-44px;top:4px;
+  width:38px;text-align:right;font-size:.65rem;color:var(--faint);
 }
 .mg:not(.ng):hover .ts-hover{display:block;}
-.msg-text{
-  font-size:.9rem;line-height:1.6;color:var(--text);
-  word-break:break-word;white-space:pre-wrap;
-}
+.msg-text{font-size:.9rem;line-height:1.6;color:var(--text);word-break:break-word;white-space:pre-wrap;}
 .msg-img{
-  margin-top:5px;max-width:min(360px,100%);
-  max-height:280px;border-radius:8px;
-  cursor:pointer;object-fit:cover;display:block;
-  transition:opacity .15s;
+  margin-top:5px;max-width:min(360px,100%);max-height:280px;border-radius:8px;
+  cursor:pointer;object-fit:cover;display:block;transition:opacity .15s;
 }
 .msg-img:hover{opacity:.88;}
-
-/* Delete action */
 .mg-del{
   display:none;position:absolute;top:-14px;right:8px;
   background:var(--c4);border:1px solid var(--border2);
@@ -423,30 +354,27 @@ body::before{
 }
 .mg:hover .mg-del{display:block;}
 .del-btn{
-  width:28px;height:28px;border-radius:4px;
-  background:none;border:none;
+  width:28px;height:28px;border-radius:4px;background:none;border:none;
   color:var(--faint);font-size:.85rem;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:all .1s;
+  display:flex;align-items:center;justify-content:center;transition:all .1s;
 }
 .del-btn:hover{background:rgba(239,68,68,.15);color:#f87171;}
 
-/* ── AUTH GATE ── */
-#chat-gate{
-  display:none;flex-direction:column;align-items:center;
-  justify-content:center;flex:1;gap:16px;
-  text-align:center;padding:40px;
+/* Chat gate - login prompt for sending only */
+#chat-gate-send{
+  display:none;
+  align-items:center;justify-content:center;
+  gap:12px;padding:12px 16px;
+  background:rgba(245,166,35,.05);
+  border:1px solid rgba(245,166,35,.1);
+  border-radius:10px;margin:8px 16px;
+  flex-shrink:0;
 }
-#chat-gate.show{display:flex;}
-#chat-gate .lock{font-size:3.5rem;margin-bottom:4px;}
-#chat-gate h2{font-family:var(--font-h);font-size:1.3rem;font-weight:800;}
-#chat-gate p{color:var(--dim);font-size:.88rem;max-width:300px;}
+#chat-gate-send.show{display:flex;}
+#chat-gate-send p{font-size:.82rem;color:var(--dim);}
 
-/* ── INPUT BAR ── */
-.chat-input-zone{
-  padding:10px 16px 18px;flex-shrink:0;
-  background:var(--c0);
-}
+/* Input bar */
+.chat-input-zone{padding:10px 16px 18px;flex-shrink:0;background:var(--c0);}
 .img-preview{
   display:none;align-items:center;gap:10px;
   padding:8px 14px;margin-bottom:6px;
@@ -460,14 +388,12 @@ body::before{
 .msg-bar{
   display:flex;align-items:center;gap:6px;
   background:var(--c3);border:1px solid var(--border);
-  border-radius:12px;padding:6px 6px 6px 16px;
-  transition:border-color .2s;
+  border-radius:12px;padding:6px 6px 6px 16px;transition:border-color .2s;
 }
 .msg-bar:focus-within{border-color:rgba(245,166,35,.25);}
 .msg-bar input{
   flex:1;background:none;border:none;outline:none;
-  color:var(--text);font-family:var(--font-b);font-size:.9rem;
-  padding:6px 0;
+  color:var(--text);font-family:var(--font-b);font-size:.9rem;padding:6px 0;
 }
 .msg-bar input::placeholder{color:var(--faint);}
 .bar-ico-btn{
@@ -491,21 +417,13 @@ body::before{
 .send-btn.ready:hover{transform:scale(1.06);box-shadow:0 4px 14px rgba(245,166,35,.35);}
 .send-btn:disabled{opacity:.3;cursor:not-allowed;}
 
-/* Locked bar state */
-.msg-bar.locked{cursor:pointer;}
-.msg-bar.locked:hover{border-color:rgba(245,166,35,.15);}
-
-/* ══════════════════════════════════════
-   ADMIN PAGE
-══════════════════════════════════════ */
+/* ══ ADMIN ══ */
 #page-admin{
   position:fixed;inset:0;top:58px;
   display:none;flex-direction:row;
-  background:var(--c0);z-index:100;
-  overflow:hidden;
+  background:var(--c0);z-index:100;overflow:hidden;
 }
 #page-admin.show{display:flex;}
-
 .adm-sidebar{
   width:220px;flex-shrink:0;
   background:var(--c1);border-right:1px solid var(--border);
@@ -514,8 +432,7 @@ body::before{
 }
 .adm-cat{
   font-size:.68rem;font-weight:700;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--faint);
-  padding:12px 8px 4px;
+  text-transform:uppercase;color:var(--faint);padding:12px 8px 4px;
 }
 .adm-item{
   display:flex;align-items:center;gap:8px;
@@ -527,7 +444,6 @@ body::before{
 .adm-item:hover{background:var(--c3);color:var(--text);}
 .adm-item.active{background:rgba(245,166,35,.1);color:var(--gold);}
 .adm-item .sico{width:18px;text-align:center;font-size:.95rem;}
-
 .adm-main{flex:1;overflow-y:auto;padding:28px 28px;max-width:780px;}
 .adm-main::-webkit-scrollbar{width:5px;}
 .adm-main::-webkit-scrollbar-thumb{background:var(--c5);border-radius:5px;}
@@ -544,24 +460,28 @@ body::before{
 .field input,.field textarea,.field select{
   width:100%;background:var(--c3);border:1px solid var(--border);
   border-radius:8px;padding:10px 14px;color:var(--text);
-  font-family:var(--font-b);font-size:.88rem;outline:none;
-  transition:border-color .2s;
+  font-family:var(--font-b);font-size:.88rem;outline:none;transition:border-color .2s;
 }
 .field textarea{resize:vertical;min-height:90px;}
 .field input:focus,.field textarea:focus{border-color:rgba(245,166,35,.35);}
 .field input::placeholder,.field textarea::placeholder{color:var(--faint);}
 
-/* Upload zone */
+/* ══ UPLOAD ZONE — FIXE ══ */
 .upload-zone{
   border:2px dashed var(--border2);border-radius:12px;
-  padding:32px;text-align:center;cursor:pointer;
+  padding:32px 20px;text-align:center;cursor:pointer;
   transition:all .2s;background:var(--c3);
+  display:block; /* Important: block pour éviter le chevauchement */
+  position:relative;
+  overflow:hidden;
 }
 .upload-zone:hover{border-color:rgba(245,166,35,.3);background:var(--c4);}
-.upload-zone .uz-ico{font-size:2rem;margin-bottom:10px;}
-.upload-zone p{font-size:.84rem;color:var(--dim);}
-.upload-zone small{font-size:.72rem;color:var(--faint);}
-.upload-zone input{display:none;}
+.upload-zone .uz-ico{font-size:2rem;margin-bottom:10px;display:block;}
+.upload-zone p{font-size:.84rem;color:var(--dim);margin-bottom:4px;}
+.upload-zone small{font-size:.72rem;color:var(--faint);display:block;}
+.upload-zone input[type="file"]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
+}
 
 /* Progress bar */
 .prog-wrap{display:none;margin-top:12px;}
@@ -574,8 +494,7 @@ body::before{
 .flash{
   background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.15);
   border-radius:8px;padding:8px 14px;
-  font-size:.8rem;color:var(--green);
-  margin-top:12px;display:none;
+  font-size:.8rem;color:var(--green);margin-top:12px;display:none;
 }
 .flash.show{display:block;}
 
@@ -588,36 +507,25 @@ body::before{
   width:28px;height:28px;border-radius:50%;
   background:linear-gradient(135deg,var(--gold),var(--gold2));
   display:inline-flex;align-items:center;justify-content:center;
-  font-size:.68rem;font-weight:700;color:white;
-  vertical-align:middle;margin-right:8px;
+  font-size:.68rem;font-weight:700;color:white;vertical-align:middle;margin-right:8px;
 }
-
-/* Bad words */
 .bw-row{display:flex;gap:8px;margin-bottom:12px;}
 .bw-row input{flex:1;}
 .bw-item{
   display:flex;align-items:center;justify-content:space-between;
-  padding:7px 12px;background:var(--c3);border-radius:7px;margin-bottom:5px;
-  font-size:.84rem;
+  padding:7px 12px;background:var(--c3);border-radius:7px;margin-bottom:5px;font-size:.84rem;
 }
 
-/* ══════════════════════════════════════
-   MUSIC BAR
-══════════════════════════════════════ */
+/* ══ MUSIC BAR ══ */
 .music-float{
   position:fixed;bottom:0;left:0;right:0;
   display:none;align-items:center;gap:12px;
   padding:8px 20px;
-  background:rgba(10,11,14,.95);
-  backdrop-filter:blur(20px);
-  border-top:1px solid var(--border);
-  z-index:300;
+  background:rgba(10,11,14,.95);backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);z-index:300;
 }
 .music-float.show{display:flex;}
-.music-spinner{
-  font-size:1.1rem;color:var(--gold);
-  animation:spin 4s linear infinite;
-}
+.music-spinner{font-size:1.1rem;color:var(--gold);animation:spin 4s linear infinite;}
 .music-spinner.paused{animation-play-state:paused;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .music-info{flex:1;min-width:0;}
@@ -625,22 +533,14 @@ body::before{
 .music-sub{font-size:.68rem;color:var(--faint);}
 .music-ctrl{display:flex;align-items:center;gap:8px;}
 .music-btn{
-  width:30px;height:30px;border-radius:8px;
-  background:var(--c3);border:none;color:var(--dim);
-  font-size:.9rem;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:all .15s;
+  width:30px;height:30px;border-radius:8px;background:var(--c3);border:none;color:var(--dim);
+  font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;
 }
 .music-btn:hover{background:var(--c4);color:var(--text);}
-.vol{
-  -webkit-appearance:none;width:64px;height:3px;
-  border-radius:3px;background:var(--c4);outline:none;cursor:pointer;
-}
+.vol{-webkit-appearance:none;width:64px;height:3px;border-radius:3px;background:var(--c4);outline:none;cursor:pointer;}
 .vol::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--gold);}
 
-/* ══════════════════════════════════════
-   MODALS
-══════════════════════════════════════ */
+/* ══ MODALS ══ */
 .ov{
   position:fixed;inset:0;
   background:rgba(0,0,0,.8);backdrop-filter:blur(8px);
@@ -661,8 +561,7 @@ body::before{
   width:28px;height:28px;border-radius:50%;
   background:var(--c4);border:none;color:var(--dim);
   font-size:.9rem;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:all .15s;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
 }
 .modal-x:hover{background:var(--c5);color:var(--text);}
 .modal-ico{font-size:2rem;margin-bottom:8px;display:block;text-align:center;}
@@ -673,8 +572,7 @@ body::before{
 .m-input{
   width:100%;background:var(--c3);border:1px solid var(--border);
   border-radius:8px;padding:10px 14px;color:var(--text);
-  font-family:var(--font-b);font-size:.88rem;outline:none;
-  transition:border-color .2s;
+  font-family:var(--font-b);font-size:.88rem;outline:none;transition:border-color .2s;
 }
 .m-input:focus{border-color:rgba(245,166,35,.35);}
 .m-input::placeholder{color:var(--faint);}
@@ -695,10 +593,25 @@ body::before{
   font-size:.8rem;color:#f87171;margin-bottom:12px;display:none;
 }
 .m-err.show{display:block;}
+.m-info{
+  background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);
+  border-radius:7px;padding:8px 12px;
+  font-size:.8rem;color:#a5b4fc;margin-bottom:12px;display:none;
+}
+.m-info.show{display:block;}
 
-/* ══════════════════════════════════════
-   TOAST
-══════════════════════════════════════ */
+/* Code 6 chiffres */
+.code-inputs{display:flex;gap:8px;justify-content:center;margin:16px 0;}
+.code-digit{
+  width:44px;height:52px;border-radius:10px;
+  background:var(--c3);border:1px solid var(--border2);
+  color:var(--text);font-family:var(--font-h);font-size:1.4rem;
+  font-weight:700;text-align:center;outline:none;
+  transition:border-color .2s;
+}
+.code-digit:focus{border-color:var(--gold);}
+
+/* ══ TOAST ══ */
 .toast{
   position:fixed;bottom:24px;left:50%;
   transform:translateX(-50%) translateY(16px);
@@ -713,23 +626,17 @@ body::before{
 .toast.s{border-color:rgba(34,197,94,.3);color:var(--green);}
 .toast.e{border-color:rgba(239,68,68,.3);color:#f87171;}
 
-/* ══════════════════════════════════════
-   LIGHTBOX
-══════════════════════════════════════ */
+/* ══ LIGHTBOX ══ */
 .lb{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:1000;display:none;align-items:center;justify-content:center;}
 .lb.open{display:flex;}
 .lb img{max-width:92vw;max-height:92vh;border-radius:8px;}
 .lb-x{position:absolute;top:16px;right:16px;background:rgba(0,0,0,.5);border:none;color:white;width:36px;height:36px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
-/* ══════════════════════════════════════
-   ANIMATIONS
-══════════════════════════════════════ */
+/* ══ ANIMATIONS ══ */
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
 
-/* ══════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════ */
+/* ══ RESPONSIVE ══ */
 @media(max-width:640px){
   .topbar{padding:0 14px;}
   .tnav-btn span.label{display:none;}
@@ -743,6 +650,7 @@ body::before{
   .chat-hdr{padding:0 12px;}
   .chat-input-zone{padding:8px 12px 14px;}
   .chat-welcome{padding:16px 12px 20px;}
+  .code-digit{width:38px;height:46px;font-size:1.2rem;}
 }
 
 ::-webkit-scrollbar{width:5px;}
@@ -774,14 +682,12 @@ body::before{
 
 <!-- ══════ SHELL ══════ -->
 <div id="shell">
-
   <!-- TOPBAR -->
   <header class="topbar">
     <a class="brand" href="#" onclick="goPage('home');return false;">
       <div class="brand-ico" id="brand-logo">☠️</div>
       <span>Mugiwara No ZK</span>
     </a>
-
     <nav class="topbar-nav">
       <button class="tnav-btn active" id="tab-home" onclick="goPage('home')">
         <span>🏠</span><span class="label">Accueil</span>
@@ -790,16 +696,16 @@ body::before{
         <span>💬</span><span class="label">Chat</span>
         <div class="dot"></div>
       </button>
+      <button class="tnav-btn" id="tab-admin" onclick="goPage('admin')" style="display:none;color:var(--gold);">
+        <span>🛡️</span><span class="label">Admin</span>
+      </button>
     </nav>
-
     <div class="topbar-sep"></div>
-
     <!-- Logged OUT -->
     <div class="topbar-btns" id="tb-out">
       <button class="btn btn-ghost btn-sm" onclick="openModal('login')">Connexion</button>
       <button class="btn btn-primary btn-sm" onclick="openModal('register')">S'inscrire</button>
     </div>
-
     <!-- Logged IN -->
     <div class="topbar-user" id="tb-in" onclick="openModal('user-menu')">
       <div class="av" id="tb-av">?</div>
@@ -810,8 +716,6 @@ body::before{
 
   <!-- ════ PAGE: HOME ════ -->
   <div class="page show" id="page-home">
-
-    <!-- HERO -->
     <section class="hero">
       <div class="hero-glow"></div>
       <div id="hero-logo-wrap"><div class="hero-logo-ph">☠️</div></div>
@@ -823,8 +727,6 @@ body::before{
         <button class="btn btn-ghost" onclick="goPage('chat')">💬 Rejoindre le chat</button>
       </div>
     </section>
-
-    <!-- FEATURES -->
     <section class="features">
       <div class="section-eyebrow">Nos critères</div>
       <div class="section-title">Pour rejoindre le club</div>
@@ -835,8 +737,6 @@ body::before{
         <div class="feat-card"><div class="feat-ico">⭐</div><h3>Bon niveau</h3><p>Maîtrise les mécaniques du jeu.</p></div>
       </div>
     </section>
-
-    <!-- VIDEO -->
     <section class="vid-section">
       <div class="section-eyebrow">Highlights</div>
       <div class="section-title">Nous en action 🎮</div>
@@ -844,33 +744,17 @@ body::before{
         <div class="vid-placeholder"><div class="ico">🎮</div><p>Vidéo bientôt disponible</p></div>
       </div>
     </section>
-
-    <!-- SOCIALS -->
     <div class="socials">
       <a class="soc-btn soc-yt" href="https://www.youtube.com/@zakarmrc212/videos" target="_blank">▶ YouTube</a>
       <a class="soc-btn soc-dc" href="https://discord.gg/RD4hQHQP7P" target="_blank">💬 Discord</a>
     </div>
-
   </div><!-- #page-home -->
-
 </div><!-- #shell -->
 
 <!-- ════ PAGE: CHAT ════ -->
 <div id="page-chat">
-
-  <!-- Auth gate (non connecté) -->
-  <div id="chat-gate">
-    <div class="lock">🔐</div>
-    <h2>Accès membres uniquement</h2>
-    <p>Connecte-toi pour rejoindre le chat du crew.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px;">
-      <button class="btn btn-primary" onclick="openModal('login')">🔑 Connexion</button>
-      <button class="btn btn-ghost" onclick="openModal('register')">⚓ S'inscrire</button>
-    </div>
-  </div>
-
-  <!-- Chat (connecté) -->
-  <div id="chat-inner" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+  <!-- Chat toujours visible -->
+  <div id="chat-inner" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
     <div class="chat-hdr">
       <div class="chat-hdr-ico">💬</div>
       <h2>général</h2>
@@ -878,19 +762,25 @@ body::before{
       <span class="chat-hdr-sub">Chat du crew Mugiwara</span>
       <div class="online-pill"><div class="online-dot"></div><span id="online-txt">En ligne</span></div>
     </div>
-
     <div class="chat-msgs" id="chat-msgs"></div>
 
-    <div class="chat-input-zone">
+    <!-- Invite à se connecter pour envoyer (visible seulement si non connecté) -->
+    <div id="chat-gate-send">
+      <p>🔐 Connecte-toi pour envoyer des messages</p>
+      <button class="btn btn-primary btn-sm" onclick="openModal('login')">Se connecter</button>
+      <button class="btn btn-ghost btn-sm" onclick="openModal('register')">S'inscrire</button>
+    </div>
+
+    <div class="chat-input-zone" id="chat-input-zone" style="display:none;">
       <div class="img-preview" id="img-preview">
         <img src="" id="preview-thumb"/>
         <span class="img-preview-name" id="preview-name"></span>
         <button class="img-cancel" onclick="cancelImg()">✕</button>
       </div>
-      <div class="msg-bar" id="msg-bar" onclick="handleBarClick()">
+      <div class="msg-bar" id="msg-bar">
         <label class="bar-ico-btn bar-ico-lbl" for="file-input" title="Joindre une image" id="attach-btn">📎</label>
         <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleImg(this)"/>
-        <input type="text" id="msg-input" placeholder="Écris un message…" maxlength="500" autocomplete="off" readonly/>
+        <input type="text" id="msg-input" placeholder="Écris un message…" maxlength="500" autocomplete="off"/>
         <button class="bar-ico-btn" title="Emoji" id="emoji-btn" style="font-size:.95rem">😊</button>
         <button class="send-btn" id="send-btn" onclick="sendMsg()">
           <svg width="15" height="15" viewBox="0 0 16 16" fill="white"><path d="M1.5 2L14.5 8L1.5 14V9.5L10 8L1.5 6.5V2Z"/></svg>
@@ -898,7 +788,6 @@ body::before{
       </div>
     </div>
   </div>
-
 </div><!-- #page-chat -->
 
 <!-- ════ PAGE: ADMIN ════ -->
@@ -947,16 +836,21 @@ body::before{
         <div class="flash" id="bw-flash">✅ Sauvegardé !</div>
       </div>
     </div>
-    <!-- MUSIC -->
+    <!-- MUSIC — CORRIGÉ -->
     <div class="adm-section" id="adm-music">
       <div class="adm-title">🎵 Musique</div>
       <div class="adm-card">
         <div class="adm-card-title">Upload fichier audio (max 4MB)</div>
         <label class="upload-zone" for="music-file">
-          <div class="uz-ico">🎵</div><p>Clique pour choisir</p><small>MP3 · WAV · OGG</small>
+          <span class="uz-ico">🎵</span>
+          <p>Clique pour choisir</p>
+          <small>MP3 · WAV · OGG · M4A — Max 4MB</small>
           <input type="file" id="music-file" accept="audio/*" onchange="uploadMedia(this,'music')"/>
         </label>
-        <div class="prog-wrap" id="music-prog"><div class="prog-track"><div class="prog-bar" id="music-bar-prog"></div></div><div class="prog-lbl" id="music-lbl"></div></div>
+        <div class="prog-wrap" id="music-prog">
+          <div class="prog-track"><div class="prog-bar" id="music-bar-prog"></div></div>
+          <div class="prog-lbl" id="music-lbl"></div>
+        </div>
         <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
           <div class="adm-card-title">Ou URL directe</div>
           <div style="display:flex;gap:8px;">
@@ -964,22 +858,28 @@ body::before{
             <button class="btn btn-primary btn-sm" onclick="saveMusicUrl()">OK</button>
           </div>
         </div>
-        <button class="btn btn-danger btn-sm" onclick="removeMedia('music')" style="margin-top:12px">🗑️ Retirer</button>
+        <button class="btn btn-danger btn-sm" onclick="removeMedia('music')" style="margin-top:12px">🗑️ Retirer la musique</button>
         <div class="flash" id="music-flash">✅ Musique mise en ligne !</div>
       </div>
     </div>
-    <!-- LOGO -->
+    <!-- LOGO — CORRIGÉ -->
     <div class="adm-section" id="adm-logo">
       <div class="adm-title">🖼️ Logo</div>
       <div class="adm-card">
         <label class="upload-zone" for="logo-file">
-          <div class="uz-ico">📁</div><p>Clique pour choisir</p><small>PNG · JPG · WebP · GIF</small>
+          <span class="uz-ico">📁</span>
+          <p>Clique pour choisir</p>
+          <small>PNG · JPG · WebP · GIF</small>
           <input type="file" id="logo-file" accept="image/*" onchange="uploadMedia(this,'logo')"/>
         </label>
-        <div class="prog-wrap" id="logo-prog"><div class="prog-track"><div class="prog-bar" id="logo-bar-prog"></div></div><div class="prog-lbl" id="logo-lbl"></div></div>
+        <div class="prog-wrap" id="logo-prog">
+          <div class="prog-track"><div class="prog-bar" id="logo-bar-prog"></div></div>
+          <div class="prog-lbl" id="logo-lbl"></div>
+        </div>
         <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
-          <div class="field"><label>Ou URL</label><input class="m-input" style="background:var(--c3)" id="logo-url" type="url" placeholder="https://…"/></div>
+          <div class="adm-card-title">Ou URL</div>
           <div style="display:flex;gap:8px;">
+            <input class="m-input" style="background:var(--c3);flex:1" id="logo-url" type="url" placeholder="https://…"/>
             <button class="btn btn-primary btn-sm" onclick="saveLogoUrl()">Appliquer</button>
             <button class="btn btn-danger btn-sm" onclick="removeMedia('logo')">🗑️ Supprimer</button>
           </div>
@@ -987,7 +887,7 @@ body::before{
         <div class="flash" id="logo-flash">✅ Logo mis à jour !</div>
       </div>
     </div>
-    <!-- VIDEO -->
+    <!-- VIDEO — CORRIGÉ -->
     <div class="adm-section" id="adm-video">
       <div class="adm-title">🎮 Vidéo</div>
       <div class="adm-card">
@@ -997,12 +897,17 @@ body::before{
           <button class="btn btn-primary btn-sm" onclick="saveYT()">Appliquer</button>
         </div>
         <div class="adm-card-title">Upload MP4 direct (max 4MB)</div>
-        <label class="upload-zone" for="video-file" style="padding:20px;">
-          <div class="uz-ico" style="font-size:1.6rem">🎮</div><p>Clique pour choisir</p><small>MP4 · WebM</small>
+        <label class="upload-zone" for="video-file">
+          <span class="uz-ico">🎮</span>
+          <p>Clique pour choisir une vidéo</p>
+          <small>MP4 · WebM · MOV — Max 4MB</small>
           <input type="file" id="video-file" accept="video/*" onchange="uploadMedia(this,'video')"/>
         </label>
-        <div class="prog-wrap" id="video-prog"><div class="prog-track"><div class="prog-bar" id="video-bar-prog"></div></div><div class="prog-lbl" id="video-lbl"></div></div>
-        <button class="btn btn-danger btn-sm" onclick="removeMedia('video')" style="margin-top:12px">🗑️ Retirer</button>
+        <div class="prog-wrap" id="video-prog">
+          <div class="prog-track"><div class="prog-bar" id="video-bar-prog"></div></div>
+          <div class="prog-lbl" id="video-lbl"></div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="removeMedia('video')" style="margin-top:12px">🗑️ Retirer la vidéo</button>
         <div class="flash" id="video-flash">✅ Vidéo mise en ligne !</div>
       </div>
     </div>
@@ -1010,6 +915,7 @@ body::before{
     <div class="adm-section" id="adm-chat-adm">
       <div class="adm-title">💬 Gestion Chat</div>
       <div class="adm-card">
+        <p style="font-size:.83rem;color:var(--dim);margin-bottom:14px;">Gérez les messages du chat en temps réel.</p>
         <button class="btn btn-danger" onclick="clearChat()">🗑️ Vider tout le chat</button>
         <div class="flash" id="chat-flash">✅ Chat vidé !</div>
         <div id="adm-chat-list" style="margin-top:16px;display:flex;flex-direction:column;gap:6px;"></div>
@@ -1026,15 +932,33 @@ body::before{
     <button class="modal-x" onclick="closeModal('login')">✕</button>
     <span class="modal-ico">🔑</span>
     <div class="modal-title">Connexion</div>
-    <div class="modal-sub">Content de te revoir !</div>
+    <div class="modal-sub">Content de te revoir dans le crew !</div>
     <div class="m-err" id="login-err"></div>
-    <div class="m-field"><label>Email</label><input class="m-input" id="login-email" type="email" placeholder="ton@email.com"/></div>
-    <div class="m-field"><label>Mot de passe</label><input class="m-input" id="login-pass" type="password" placeholder="••••••••"/></div>
-    <button class="m-btn p" onclick="doLogin()">Se connecter</button>
+    <div class="m-info" id="login-info"></div>
+    <div id="login-form">
+      <div class="m-field"><label>Email</label><input class="m-input" id="login-email" type="email" placeholder="ton@email.com"/></div>
+      <div class="m-field"><label>Mot de passe</label><input class="m-input" id="login-pass" type="password" placeholder="••••••••"/></div>
+      <button class="m-btn p" onclick="doLogin()">Se connecter</button>
+    </div>
+    <!-- Étape vérification code -->
+    <div id="login-verify" style="display:none;">
+      <p style="font-size:.82rem;color:var(--dim);text-align:center;margin-bottom:8px;">Un code à 6 chiffres a été envoyé à</p>
+      <p style="font-size:.85rem;font-weight:700;text-align:center;margin-bottom:16px;" id="login-email-shown"></p>
+      <div class="code-inputs">
+        <input class="code-digit" maxlength="1" type="text" inputmode="numeric" oninput="codeNav(this,0,'login')"/>
+        <input class="code-digit" maxlength="1" type="text" inputmode="numeric" oninput="codeNav(this,1,'login')"/>
+        <input class="code-digit" maxlength="1" type="text" inputmode="numeric" oninput="codeNav(this,2,'login')"/>
+        <input class="code-digit" maxlength="1" type="text" inputmode="numeric" oninput="codeNav(this,3,'login')"/>
+        <input class="code-digit" maxlength="1" type="text" inputmode="numeric" oninput="codeNav(this,4,'login')"/>
+        <input class="code-digit" maxlength="1" type="text" inputmode="numeric" oninput="codeNav(this,5,'login')"/>
+      </div>
+      <button class="m-btn p" onclick="verifyCode('login')">✅ Vérifier</button>
+      <button class="m-btn g" onclick="resendCode('login')">🔄 Renvoyer le code</button>
+    </div>
     <div class="m-div">ou</div>
-    <button class="m-btn g" onclick="closeModal('login');openModal('register')">Créer un compte</button>
+    <button class="m-btn g" onclick="closeModal('login');openModal('register')">⚓ Créer un compte</button>
     <div class="m-div">Admin ?</div>
-    <button class="m-btn g" onclick="closeModal('login');openModal('admin-login')">🛡️ Accès admin</button>
+    <button class="m-btn g" onclick="closeModal('login');openModal('admin-login')">🛡️ Connexion Admin</button>
   </div>
 </div>
 
@@ -1046,25 +970,47 @@ body::before{
     <div class="modal-title">Créer un compte</div>
     <div class="modal-sub">Rejoins le crew Mugiwara !</div>
     <div class="m-err" id="reg-err"></div>
-    <div class="m-field"><label>Pseudo (tag Brawl Stars)</label><input class="m-input" id="reg-pseudo" placeholder="ton pseudo"/></div>
-    <div class="m-field"><label>Email</label><input class="m-input" id="reg-email" type="email" placeholder="ton@email.com"/></div>
-    <div class="m-field"><label>Mot de passe</label><input class="m-input" id="reg-pass" type="password" placeholder="••••••••"/></div>
-    <button class="m-btn p" onclick="doRegister()">Créer le compte</button>
+    <div class="m-info" id="reg-info"></div>
+    <div id="reg-form">
+      <div class="m-field"><label>Pseudo (tag Brawl Stars)</label><input class="m-input" id="reg-pseudo" placeholder="ton pseudo"/></div>
+      <div class="m-field"><label>Email</label><input class="m-input" id="reg-email" type="email" placeholder="ton@email.com"/></div>
+      <div class="m-field"><label>Mot de passe</label><input class="m-input" id="reg-pass" type="password" placeholder="••••••••"/></div>
+      <button class="m-btn p" onclick="doRegister()">Créer le compte</button>
+    </div>
+    <!-- Étape vérification code -->
+    <div id="reg-verify" style="display:none;">
+      <p style="font-size:.82rem;color:var(--dim);text-align:center;margin-bottom:8px;">Un code à 6 chiffres a été envoyé à</p>
+      <p style="font-size:.85rem;font-weight:700;text-align:center;margin-bottom:16px;" id="reg-email-shown"></p>
+      <div class="code-inputs">
+        <input class="code-digit" maxlength="1" type="text" inputmode="numeric" oninput="codeNav(this,0,'reg')"/>
+        <input class="code-digit" maxlength="1" type="text" inputmode="numeric" oninput="codeNav(this,1,'reg')"/>
+        <input class="code-digit" maxlength="1" type="text" inputmode="numeric" oninput="codeNav(this,2,'reg')"/>
+        <input class="code-digit" maxlength="1" type="text" inputmode="numeric" oninput="codeNav(this,3,'reg')"/>
+        <input class="code-digit" maxlength="1" type="text" inputmode="numeric" oninput="codeNav(this,4,'reg')"/>
+        <input class="code-digit" maxlength="1" type="text" inputmode="numeric" oninput="codeNav(this,5,'reg')"/>
+      </div>
+      <button class="m-btn p" onclick="verifyCode('reg')">✅ Vérifier</button>
+      <button class="m-btn g" onclick="resendCode('reg')">🔄 Renvoyer le code</button>
+    </div>
     <div class="m-div">Déjà un compte ?</div>
-    <button class="m-btn g" onclick="closeModal('register');openModal('login')">Se connecter</button>
+    <button class="m-btn g" onclick="closeModal('register');openModal('login')">🔑 Se connecter</button>
   </div>
 </div>
 
-<!-- ADMIN LOGIN -->
+<!-- ADMIN LOGIN — COMPLET avec email + mdp + ID -->
 <div class="ov" id="ov-admin-login">
   <div class="modal">
     <button class="modal-x" onclick="closeModal('admin-login')">✕</button>
     <span class="modal-ico">🛡️</span>
-    <div class="modal-title">Accès Admin</div>
-    <div class="modal-sub">Réservé aux administrateurs</div>
+    <div class="modal-title">Connexion Admin</div>
+    <div class="modal-sub">Accès réservé aux administrateurs</div>
     <div class="m-err" id="adm-err"></div>
-    <div class="m-field"><label>Mot de passe admin</label><input class="m-input" id="adm-pass" type="password" placeholder="••••••••" autocomplete="off"/></div>
-    <button class="m-btn p" onclick="doAdminLogin()">Accéder au panel</button>
+    <div id="adm-form">
+      <div class="m-field"><label>Email admin</label><input class="m-input" id="adm-email" type="email" placeholder="admin@email.com" autocomplete="off"/></div>
+      <div class="m-field"><label>Mot de passe</label><input class="m-input" id="adm-pass" type="password" placeholder="••••••••" autocomplete="off"/></div>
+      <div class="m-field"><label>ID Admin</label><input class="m-input" id="adm-id" type="text" placeholder="votre-id-admin" autocomplete="off"/></div>
+      <button class="m-btn p" onclick="doAdminLogin()">Accéder au panel</button>
+    </div>
   </div>
 </div>
 
@@ -1077,6 +1023,8 @@ body::before{
       <div style="font-family:var(--font-h);font-size:1rem;font-weight:800;" id="menu-name">—</div>
     </div>
     <button class="m-btn g" onclick="closeModal('user-menu');goPage('chat')">💬 Aller au chat</button>
+    <!-- Bouton Panel Admin visible uniquement pour l'admin -->
+    <button class="m-btn g" id="menu-admin-btn" style="display:none;background:rgba(245,166,35,.1);color:var(--gold);border:1px solid rgba(245,166,35,.2);" onclick="closeModal('user-menu');goPage('admin')">🛡️ Panel Admin</button>
     <button class="m-btn g" onclick="closeModal('user-menu');doLogout()" style="color:var(--red);">🚪 Déconnexion</button>
   </div>
 </div>
@@ -1086,12 +1034,24 @@ body::before{
    STATE
 ══════════════════════════ */
 let me = null, myPseudo = '', chatUnsub = null, pendingImg = null, musicOn = false;
-let bw = [];
+let bw = [], bwLocal = [];
 
-const _HASH = '03c487d328351d63ec2db311045fda7ee7ce8b68c617cecb1a0d2301615ea68e';
-const _SALT = 'mzk_mugiwara_2025';
-const _TOK  = '90c42cedd4c8713a1c3b1f50d5d79c60cec13a515434dbecea9cc2342049212b';
+/* Credentials admin — stockés côté client uniquement (site statique) */
+const ADMIN_EMAIL = 'zkouaz89@gmail.com';
+const ADMIN_PASS  = 'Zakar_89';
+const ADMIN_ID    = 'mugiwara-admin';
+
+/* Token de session admin */
+const _TOK = '90c42cedd4c8713a1c3b1f50d5d79c60cec13a515434dbecea9cc2342049212b';
 let isAdmin = sessionStorage.getItem('mzk_adm') === _TOK;
+
+/* Codes de vérification en mémoire */
+const _pendingCodes = {}; // { 'login': {code, email, ts}, 'reg': {code, email, ts, pseudo, pass} }
+
+/* EmailJS config — REMPLACE par tes vraies clés */
+const EJS_SERVICE  = 'service_mzk';      // ← ton Service ID EmailJS
+const EJS_TEMPLATE = 'template_mzk';     // ← ton Template ID EmailJS
+const EJS_PUBLIC   = 'YOUR_PUBLIC_KEY';  // ← ta clé publique EmailJS
 
 /* ══════════════════════════
    UTILS
@@ -1099,37 +1059,78 @@ let isAdmin = sessionStorage.getItem('mzk_adm') === _TOK;
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2,'0');
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
 function toast(msg, t='s') {
   const el=$('toast'); el.textContent=msg; el.className='toast show '+t;
   setTimeout(()=>el.className='toast',3000);
 }
 function flash(id){ const el=$(id); el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2500); }
 
+function genCode(){ return Math.floor(100000+Math.random()*900000).toString(); }
+
+/* ══════════════════════════
+   EMAILJS — Envoi du code
+══════════════════════════ */
+async function sendVerifCode(email, code) {
+  // Si EmailJS n'est pas configuré, on simule (affiche en console + toast pour dev)
+  if(EJS_PUBLIC === 'YOUR_PUBLIC_KEY') {
+    console.log(`[DEV] Code de vérification pour ${email}: ${code}`);
+    toast(`[DEV] Code: ${code}`, 's');
+    return true;
+  }
+  try {
+    await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+      to_email: email,
+      to_name: email.split('@')[0],
+      code: code,
+      site_name: 'Mugiwara No ZK'
+    }, EJS_PUBLIC);
+    return true;
+  } catch(e) {
+    console.error('EmailJS error:', e);
+    return false;
+  }
+}
+
+/* ══════════════════════════
+   CODE NAV (6 chiffres)
+══════════════════════════ */
+function codeNav(input, idx, prefix) {
+  // Garder seulement un chiffre
+  input.value = input.value.replace(/\D/g,'').slice(-1);
+  // Passer au suivant
+  const digits = document.querySelectorAll(`#ov-${prefix === 'login' ? 'login' : 'register'} .code-digit`);
+  if(input.value && idx < 5) digits[idx+1].focus();
+}
+
+function getCodeValue(prefix) {
+  const modalId = prefix === 'login' ? 'login' : 'register';
+  const digits = document.querySelectorAll(`#ov-${modalId} .code-digit`);
+  return Array.from(digits).map(d=>d.value).join('');
+}
+
+function clearCodeInputs(prefix) {
+  const modalId = prefix === 'login' ? 'login' : 'register';
+  document.querySelectorAll(`#ov-${modalId} .code-digit`).forEach(d=>d.value='');
+}
+
 /* ══════════════════════════
    PAGES
 ══════════════════════════ */
 let currentPage = 'home';
-function goPage(p) {
-  // Chat requires auth
-  if(p==='chat' && !me && !isAdmin){ openModal('login'); _afterLogin='chat'; return; }
-  if(p==='admin' && !isAdmin){ openModal('admin-login'); return; }
+let _afterLogin = null;
 
+function goPage(p) {
+  if(p==='admin' && !isAdmin){ openModal('admin-login'); return; }
   currentPage = p;
-  // Toggle topbar tabs
   document.querySelectorAll('.tnav-btn').forEach(b=>b.classList.remove('active'));
   const tab=$('tab-'+p); if(tab) tab.classList.add('active');
-
-  // Show/hide pages
   $('page-home').classList.toggle('show', p==='home');
   $('page-chat').style.display = p==='chat' ? 'flex' : 'none';
   $('page-admin').style.display = p==='admin' ? 'flex' : 'none';
-
   if(p==='chat') initChatUI();
   if(p==='admin') loadAdminData();
 }
-
-// After login redirect
-let _afterLogin = null;
 
 /* ══════════════════════════
    MODAL
@@ -1138,60 +1139,198 @@ function openModal(id)  { $('ov-'+id).classList.add('open'); }
 function closeModal(id) {
   $('ov-'+id).classList.remove('open');
   document.querySelectorAll('#ov-'+id+' .m-err').forEach(e=>e.classList.remove('show'));
+  document.querySelectorAll('#ov-'+id+' .m-info').forEach(e=>e.classList.remove('show'));
 }
 document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
 
 /* ══════════════════════════
-   AUTH
+   VÉRIFICATION DÉJÀ CONNECTÉ
 ══════════════════════════ */
-async function doLogin() {
-  const {auth,signInWithEmailAndPassword}=window._fb;
-  const email=$('login-email').value.trim(), pass=$('login-pass').value;
-  const err=$('login-err'); err.classList.remove('show');
-  try {
-    await signInWithEmailAndPassword(auth,email,pass);
-    closeModal('login'); toast('Bienvenue 🏴‍☠️');
-    if(_afterLogin){ goPage(_afterLogin); _afterLogin=null; }
-  } catch(e){ err.textContent='Email ou mot de passe incorrect.'; err.classList.add('show'); }
+function isAlreadyVerified(email) {
+  const stored = localStorage.getItem('mzk_verified_' + btoa(email));
+  if(!stored) return false;
+  const ts = parseInt(stored);
+  // Session valide 30 jours
+  return Date.now() - ts < 30 * 24 * 60 * 60 * 1000;
+}
+function markVerified(email) {
+  localStorage.setItem('mzk_verified_' + btoa(email), Date.now().toString());
 }
 
-async function doRegister() {
-  const {auth,db,ref,set,createUserWithEmailAndPassword}=window._fb;
-  const pseudo=$('reg-pseudo').value.trim(), email=$('reg-email').value.trim(), pass=$('reg-pass').value;
-  const err=$('reg-err'); err.classList.remove('show');
-  if(!pseudo){ err.textContent='Pseudo requis.'; err.classList.add('show'); return; }
+/* ══════════════════════════
+   AUTH — LOGIN
+══════════════════════════ */
+async function doLogin() {
+  const {auth, signInWithEmailAndPassword} = window._fb;
+  const email = $('login-email').value.trim();
+  const pass  = $('login-pass').value;
+  const err   = $('login-err');
+  const info  = $('login-info');
+  err.classList.remove('show');
+  info.classList.remove('show');
+
+  if(!email || !pass) { err.textContent='Remplis tous les champs.'; err.classList.add('show'); return; }
+
+  // Vérifier les identifiants Firebase d'abord
   try {
-    const cred=await createUserWithEmailAndPassword(auth,email,pass);
-    await set(ref(db,'users/'+cred.user.uid),{pseudo,email,createdAt:new Date().toISOString()});
-    closeModal('register'); toast('Bienvenue '+pseudo+' 🎉');
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    err.textContent = 'Email ou mot de passe incorrect.'; err.classList.add('show'); return;
+  }
+
+  // Si déjà vérifié sur cet appareil, pas besoin de code
+  if(isAlreadyVerified(email)) {
+    closeModal('login');
+    toast('Bienvenue 🏴‍☠️');
     if(_afterLogin){ goPage(_afterLogin); _afterLogin=null; }
-  } catch(e){
-    err.textContent=e.code==='auth/email-already-in-use'?'Ce compte existe déjà.':'Erreur : '+e.message;
-    err.classList.add('show');
+    return;
+  }
+
+  // Sinon envoyer un code de vérification
+  const code = genCode();
+  _pendingCodes['login'] = { code, email, ts: Date.now() };
+
+  // Déconnecter temporairement (on reconnecte après vérif)
+  await window._fb.signOut(window._fb.auth).catch(()=>{});
+  me = null;
+
+  const sent = await sendVerifCode(email, code);
+  if(sent || EJS_PUBLIC === 'YOUR_PUBLIC_KEY') {
+    $('login-form').style.display = 'none';
+    $('login-verify').style.display = 'block';
+    $('login-email-shown').textContent = email;
+    info.textContent = 'Code envoyé ! Vérifie ta boite mail.';
+    info.classList.add('show');
+    clearCodeInputs('login');
+    document.querySelector('#ov-login .code-digit').focus();
+  } else {
+    err.textContent = 'Erreur envoi email. Réessaie.'; err.classList.add('show');
   }
 }
 
-async function hashStr(s) {
-  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-async function doAdminLogin() {
-  const pass=$('adm-pass').value;
-  const err=$('adm-err'); err.classList.remove('show');
-  const h=await hashStr(pass+_SALT);
-  if(h!==_HASH){ err.textContent='Mot de passe incorrect.'; err.classList.add('show'); return; }
-  isAdmin=true; sessionStorage.setItem('mzk_adm',_TOK);
-  closeModal('admin-login');
-  $('tab-admin-btn') && $('tab-admin-btn').style.setProperty('display','flex');
-  goPage('admin'); toast('Accès admin accordé 🛡️');
+async function verifyCode(prefix) {
+  const pending = _pendingCodes[prefix];
+  const err = $(prefix === 'login' ? 'login-err' : 'reg-err');
+  err.classList.remove('show');
+
+  if(!pending) { err.textContent='Session expirée, recommence.'; err.classList.add('show'); return; }
+  if(Date.now() - pending.ts > 10*60*1000) {
+    err.textContent='Code expiré (10 min). Clique Renvoyer.'; err.classList.add('show'); return;
+  }
+
+  const entered = getCodeValue(prefix);
+  if(entered.length !== 6) { err.textContent='Entre les 6 chiffres.'; err.classList.add('show'); return; }
+  if(entered !== pending.code) { err.textContent='Code incorrect.'; err.classList.add('show'); clearCodeInputs(prefix); return; }
+
+  // Code correct
+  markVerified(pending.email);
+  delete _pendingCodes[prefix];
+
+  if(prefix === 'login') {
+    // Se reconnecter
+    try {
+      await window._fb.signInWithEmailAndPassword(window._fb.auth, pending.email, $('login-pass').value);
+    } catch(e) {
+      // Si mot de passe pas en mémoire, demander de se reconnecter
+      $('login-form').style.display='block';
+      $('login-verify').style.display='none';
+      err.textContent='Session expirée, reconnecte-toi.'; err.classList.add('show'); return;
+    }
+    closeModal('login');
+    toast('Bienvenue 🏴‍☠️');
+    if(_afterLogin){ goPage(_afterLogin); _afterLogin=null; }
+  } else {
+    // Créer le compte
+    const {auth,db,ref,set,createUserWithEmailAndPassword} = window._fb;
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, pending.email, pending.pass);
+      await set(ref(db,'users/'+cred.user.uid),{pseudo:pending.pseudo,email:pending.email,createdAt:new Date().toISOString()});
+      closeModal('register');
+      toast('Bienvenue '+pending.pseudo+' 🎉');
+      if(_afterLogin){ goPage(_afterLogin); _afterLogin=null; }
+    } catch(e) {
+      err.textContent = e.code==='auth/email-already-in-use'?'Ce compte existe déjà.':'Erreur : '+e.message;
+      err.classList.add('show');
+    }
+  }
 }
 
+async function resendCode(prefix) {
+  const pending = _pendingCodes[prefix];
+  if(!pending) return;
+  const code = genCode();
+  pending.code = code; pending.ts = Date.now();
+  clearCodeInputs(prefix);
+  const sent = await sendVerifCode(pending.email, code);
+  if(sent || EJS_PUBLIC === 'YOUR_PUBLIC_KEY') toast('Nouveau code envoyé 📬');
+  else toast('Erreur envoi', 'e');
+}
+
+/* ══════════════════════════
+   AUTH — REGISTER
+══════════════════════════ */
+async function doRegister() {
+  const pseudo = $('reg-pseudo').value.trim();
+  const email  = $('reg-email').value.trim();
+  const pass   = $('reg-pass').value;
+  const err    = $('reg-err');
+  const info   = $('reg-info');
+  err.classList.remove('show'); info.classList.remove('show');
+
+  if(!pseudo) { err.textContent='Pseudo requis.'; err.classList.add('show'); return; }
+  if(!email)  { err.textContent='Email requis.'; err.classList.add('show'); return; }
+  if(pass.length < 6) { err.textContent='Mot de passe trop court (min 6 car.).'; err.classList.add('show'); return; }
+
+  // Envoyer le code avant de créer le compte
+  const code = genCode();
+  _pendingCodes['reg'] = { code, email, ts: Date.now(), pseudo, pass };
+
+  const sent = await sendVerifCode(email, code);
+  if(sent || EJS_PUBLIC === 'YOUR_PUBLIC_KEY') {
+    $('reg-form').style.display='none';
+    $('reg-verify').style.display='block';
+    $('reg-email-shown').textContent = email;
+    info.textContent = 'Code envoyé ! Vérifie ta boite mail.';
+    info.classList.add('show');
+    clearCodeInputs('reg');
+    document.querySelector('#ov-register .code-digit').focus();
+  } else {
+    err.textContent='Erreur envoi email. Réessaie.'; err.classList.add('show');
+  }
+}
+
+/* ══════════════════════════
+   AUTH — ADMIN LOGIN
+══════════════════════════ */
+async function doAdminLogin() {
+  const email = $('adm-email').value.trim();
+  const pass  = $('adm-pass').value;
+  const id    = $('adm-id').value.trim();
+  const err   = $('adm-err'); err.classList.remove('show');
+
+  if(!email || !pass || !id) {
+    err.textContent='Remplis tous les champs (email, mot de passe, ID).'; err.classList.add('show'); return;
+  }
+  if(email !== ADMIN_EMAIL || pass !== ADMIN_PASS || id !== ADMIN_ID) {
+    err.textContent='Identifiants incorrects.'; err.classList.add('show'); return;
+  }
+
+  isAdmin = true;
+  sessionStorage.setItem('mzk_adm', _TOK);
+  closeModal('admin-login');
+  goPage('admin');
+  toast('Accès admin accordé 🛡️');
+}
+
+/* ══════════════════════════
+   LOGOUT
+══════════════════════════ */
 function doLogout() {
-  const {auth,signOut}=window._fb;
+  const {auth, signOut} = window._fb;
   signOut(auth).catch(()=>{});
   sessionStorage.removeItem('mzk_adm');
-  me=null; myPseudo=''; isAdmin=false;
-  if(chatUnsub){ chatUnsub(); chatUnsub=null; }
+  me = null; myPseudo = ''; isAdmin = false;
+  if(chatUnsub){ chatUnsub(); chatUnsub = null; }
   updateAuthUI(null);
   goPage('home'); toast('Déconnecté 👋');
 }
@@ -1201,196 +1340,206 @@ function updateAuthUI(user) {
   if(user || isAdmin){
     tbOut.style.display='none'; tbIn.classList.add('show');
     const name = isAdmin ? '🛡️ Admin' : myPseudo;
-    $('tb-name').textContent=name;
-    $('tb-av').textContent=(name[0]||'?').toUpperCase();
-    $('menu-av').textContent=(name[0]||'?').toUpperCase();
-    $('menu-name').textContent=name;
+    $('tb-name').textContent = name;
+    $('tb-av').textContent = (name.replace(/[^a-zA-Z]/g,'')[0]||'A').toUpperCase();
+    $('menu-av').textContent = (name.replace(/[^a-zA-Z]/g,'')[0]||'A').toUpperCase();
+    $('menu-name').textContent = name;
+    // Afficher le bouton Admin si admin
+    if(isAdmin){
+      $('tab-admin').style.display = 'flex';
+      $('menu-admin-btn').style.display = 'block';
+    }
   } else {
     tbOut.style.display='flex'; tbIn.classList.remove('show');
+    $('tab-admin').style.display = 'none';
+    $('menu-admin-btn').style.display = 'none';
   }
 }
 
 /* ══════════════════════════
    FIREBASE INIT
 ══════════════════════════ */
-window.addEventListener('load',()=>{
-  const {auth,db,ref,get,onAuthStateChanged,onValue}=window._fb;
+window.addEventListener('load', () => {
+  const {auth, db, ref, get, onAuthStateChanged, onValue} = window._fb;
 
-  // Init admin nav if session active
+  // Init EmailJS
+  if(EJS_PUBLIC !== 'YOUR_PUBLIC_KEY') emailjs.init(EJS_PUBLIC);
+
   if(isAdmin) updateAuthUI(null);
 
-  onAuthStateChanged(auth, async user=>{
-    me=user;
+  onAuthStateChanged(auth, async user => {
+    me = user;
     if(user){
-      try{
-        const s=await get(ref(db,'users/'+user.uid));
-        myPseudo=s.exists()?(s.val().pseudo||user.email):user.email;
-      } catch(e){ myPseudo=user.email; }
+      try {
+        const s = await get(ref(db,'users/'+user.uid));
+        myPseudo = s.exists() ? (s.val().pseudo || user.email) : user.email;
+      } catch(e){ myPseudo = user.email; }
       updateAuthUI(user);
-      // Si on était sur le chat, ouvre le chat
       if(currentPage==='chat') initChatUI();
     } else if(!isAdmin){
       updateAuthUI(null);
     }
   });
 
-  // Bad words
-  onValue(ref(db,'settings/badwords'),s=>{ bw=s.exists()?(s.val()||[]): []; });
-
-  // Public settings
-  onValue(ref(db,'settings/homepage'),s=>{
+  onValue(ref(db,'settings/badwords'), s => { bw = s.exists() ? (s.val()||[]) : []; });
+  onValue(ref(db,'settings/homepage'), s => {
     if(!s.exists()) return;
-    const d=s.val();
-    if(d.title){ const t=$('hero-title'); t.innerHTML=fmtTitle(d.title); }
-    if(d.subtitle) $('hero-sub').textContent=d.subtitle;
-    if(d.joinUrl) $('btn-join').href=d.joinUrl;
+    const d = s.val();
+    if(d.title){ $('hero-title').innerHTML = fmtTitle(d.title); }
+    if(d.subtitle) $('hero-sub').textContent = d.subtitle;
+    if(d.joinUrl) $('btn-join').href = d.joinUrl;
     if(d.criteria) renderCriteria(d.criteria);
-    // Admin prefill
-    if($('adm-title')) $('adm-title').value=d.title||'';
-    if($('adm-sub'))   $('adm-sub').value=d.subtitle||'';
-    if($('adm-url'))   $('adm-url').value=d.joinUrl||'';
-    if($('adm-criteria')) $('adm-criteria').value=d.criteria||'';
+    if($('adm-title')) $('adm-title').value = d.title||'';
+    if($('adm-sub'))   $('adm-sub').value   = d.subtitle||'';
+    if($('adm-url'))   $('adm-url').value   = d.joinUrl||'';
+    if($('adm-criteria')) $('adm-criteria').value = d.criteria||'';
   });
-  onValue(ref(db,'settings/logo'),s=>{ setLogo(s.exists()?s.val():null); });
-  onValue(ref(db,'settings/video'),s=>{ setVideo(s.exists()?s.val():null); });
-  onValue(ref(db,'settings/music'),s=>{
-    const url=s.exists()?s.val():null;
-    const audio=$('bg-audio'), bar=$('music-bar');
-    if(url){ audio.src=url; audio.volume=0.6; bar.classList.add('show'); $('m-name').textContent=url.split('/').pop().replace(/\.[^.]+$/,'')||'MZK Radio'; }
-    else { bar.classList.remove('show'); audio.src=''; audio.pause(); musicOn=false; }
+  onValue(ref(db,'settings/logo'),  s => setLogo(s.exists()  ? s.val() : null));
+  onValue(ref(db,'settings/video'), s => setVideo(s.exists() ? s.val() : null));
+  onValue(ref(db,'settings/music'), s => {
+    const url = s.exists() ? s.val() : null;
+    const audio = $('bg-audio'), bar = $('music-bar');
+    if(url){
+      audio.src = url; audio.volume = 0.6; bar.classList.add('show');
+      $('m-name').textContent = url.split('/').pop().replace(/\.[^.]+$/,'')||'MZK Radio';
+    } else {
+      bar.classList.remove('show'); audio.src=''; audio.pause(); musicOn=false;
+    }
   });
+
+  // Chat toujours chargé (visible par tous)
+  startChat();
 });
 
 /* ══════════════════════════
    PUBLIC DATA
 ══════════════════════════ */
 function fmtTitle(t){
-  const parts=t.split(' ');
-  if(parts.length<2) return '<em>'+esc(t)+'</em>';
+  const parts = t.split(' ');
+  if(parts.length < 2) return '<em>'+esc(t)+'</em>';
   return esc(parts.slice(0,-1).join(' '))+' <em>'+esc(parts[parts.length-1])+'</em>';
 }
 function renderCriteria(raw){
-  const lines=raw.split('\n').filter(l=>l.trim());
-  const grid=$('feat-grid');
-  grid.innerHTML=lines.map(l=>{
-    const ico=l.match(/^\p{Emoji}/u)?.[0]||'✦';
-    const txt=l.replace(/^\p{Emoji}\s*/u,'').trim();
+  const lines = raw.split('\n').filter(l=>l.trim());
+  const grid = $('feat-grid');
+  grid.innerHTML = lines.map(l=>{
+    const ico = l.match(/^\p{Emoji}/u)?.[0]||'✦';
+    const txt = l.replace(/^\p{Emoji}\s*/u,'').trim();
     return `<div class="feat-card"><div class="feat-ico">${ico}</div><h3>${esc(txt)}</h3></div>`;
   }).join('');
 }
 function setLogo(url){
-  const w=$('hero-logo-wrap');
-  if(url){ w.innerHTML=`<img class="hero-logo" src="${url}" alt="Logo"/>`; $('brand-logo').innerHTML=`<img src="${url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" alt=""/>`; }
-  else { w.innerHTML='<div class="hero-logo-ph">☠️</div>'; $('brand-logo').innerHTML='☠️'; }
+  const w = $('hero-logo-wrap');
+  if(url){
+    w.innerHTML = `<img class="hero-logo" src="${url}" alt="Logo"/>`;
+    $('brand-logo').innerHTML = `<img src="${url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" alt=""/>`;
+  } else {
+    w.innerHTML = '<div class="hero-logo-ph">☠️</div>';
+    $('brand-logo').innerHTML = '☠️';
+  }
 }
 function setVideo(url){
-  const w=$('vid-wrap');
+  const w = $('vid-wrap');
   if(!url){ w.innerHTML='<div class="vid-placeholder"><div class="ico">🎮</div><p>Vidéo bientôt disponible</p></div>'; return; }
   if(url.includes('youtube')||url.includes('youtu.be')){
-    const id=(url.match(/v=([^&]+)/)||url.match(/youtu\.be\/([^?]+)/))?.[1]||'';
-    w.innerHTML=`<iframe src="https://www.youtube.com/embed/${id}?rel=0" allowfullscreen></iframe>`;
-  } else { w.innerHTML=`<video src="${url}" controls></video>`; }
+    const id = (url.match(/v=([^&]+)/)||url.match(/youtu\.be\/([^?]+)/))?.[1]||'';
+    w.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?rel=0" allowfullscreen></iframe>`;
+  } else {
+    w.innerHTML = `<video src="${url}" controls></video>`;
+  }
 }
 
 /* ══════════════════════════
-   CHAT
+   CHAT — PUBLIC EN LECTURE
 ══════════════════════════ */
 function initChatUI(){
-  if(!me && !isAdmin){
-    $('chat-gate').classList.add('show');
-    $('chat-gate').style.display='flex';
-    $('chat-inner').style.display='none';
-    return;
+  if(me || isAdmin){
+    $('chat-gate-send').classList.remove('show');
+    $('chat-input-zone').style.display = 'block';
+  } else {
+    $('chat-gate-send').classList.add('show');
+    $('chat-input-zone').style.display = 'none';
   }
-  $('chat-gate').style.display='none';
-  $('chat-inner').style.display='flex';
-  unlockBar();
-  if(!chatUnsub) startChat();
 }
 
-function unlockBar(){
-  const inp=$('msg-input');
-  inp.placeholder='Écris un message…'; inp.removeAttribute('readonly');
-  $('msg-bar').style.cursor='text';
-  $('attach-btn').style.opacity='1'; $('attach-btn').style.pointerEvents='auto';
-  $('emoji-btn').style.opacity='1'; $('emoji-btn').style.pointerEvents='auto';
+function filterBW(txt){
+  let o = txt;
+  bw.forEach(w=>{
+    const r = new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
+    o = o.replace(r, m=>'*'.repeat(m.length));
+  });
+  return o;
 }
-function handleBarClick(){
-  if(!me && !isAdmin){ openModal('login'); _afterLogin='chat'; }
-}
-
-function filterBW(txt){ let o=txt; bw.forEach(w=>{ const r=new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'); o=o.replace(r,m=>'*'.repeat(m.length)); }); return o; }
 
 function startChat(){
-  const {db,ref,onValue}=window._fb;
-  chatUnsub=onValue(ref(db,'chat'),snap=>{
-    const wrap=$('chat-msgs');
-    const atBottom=wrap.scrollHeight-wrap.scrollTop-wrap.clientHeight<120;
-    wrap.innerHTML='';
+  const {db, ref, onValue} = window._fb;
+  chatUnsub = onValue(ref(db,'chat'), snap => {
+    const wrap = $('chat-msgs');
+    const atBottom = wrap.scrollHeight - wrap.scrollTop - wrap.clientHeight < 120;
+    wrap.innerHTML = '';
 
     // Welcome banner
-    const wb=document.createElement('div'); wb.className='chat-welcome';
+    const wb = document.createElement('div'); wb.className='chat-welcome';
     wb.innerHTML='<div class="chat-welcome-ico">☠️</div><h3>Bienvenue dans #général !</h3><p>Le chat du club Mugiwara No ZK. Partagez, discutez et grimpez ensemble 🏆</p>';
     wrap.appendChild(wb);
 
-    if(!snap.exists()){ return; }
-    const data=snap.val();
-    const keys=Object.keys(data).sort((a,b)=>data[a].ts-data[b].ts);
-    let lastUid=null, lastTs=0, lastDate='';
+    if(!snap.exists()) return;
+    const data = snap.val();
+    const keys = Object.keys(data).sort((a,b)=>data[a].ts-data[b].ts);
+    let lastUid='', lastTs=0, lastDate='';
 
     keys.forEach(key=>{
-      const m=data[key];
-      const isOwn=me&&m.uid===me.uid;
-      const dt=new Date(m.ts);
-      const ds=dt.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
-      const newGrp=m.uid!==lastUid||(m.ts-lastTs)>5*60*1000;
+      const m = data[key];
+      const dt = new Date(m.ts);
+      const ds = dt.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+      const newGrp = m.uid!==lastUid || (m.ts-lastTs)>5*60*1000;
 
-      if(ds!==lastDate){
-        const sep=document.createElement('div'); sep.className='date-sep';
-        sep.textContent=ds.charAt(0).toUpperCase()+ds.slice(1);
+      if(ds !== lastDate){
+        const sep = document.createElement('div'); sep.className='date-sep';
+        sep.textContent = ds.charAt(0).toUpperCase()+ds.slice(1);
         wrap.appendChild(sep); lastDate=ds;
       }
 
-      const g=document.createElement('div');
-      g.className='mg'+(newGrp?' ng':'');
+      const g = document.createElement('div');
+      g.className = 'mg'+(newGrp?' ng':'');
 
       // Avatar
-      const avW=document.createElement('div'); avW.className='mg-av';
-      const av=document.createElement('div'); av.className='av-circ'+(m.isAdmin?' av-adm':'');
-      av.textContent=(m.pseudo||'?')[0].toUpperCase(); avW.appendChild(av); g.appendChild(avW);
+      const avW = document.createElement('div'); avW.className='mg-av';
+      const av = document.createElement('div'); av.className='av-circ'+(m.isAdmin?' av-adm':'');
+      av.textContent = (m.pseudo||'?')[0].toUpperCase(); avW.appendChild(av); g.appendChild(avW);
 
       // Body
-      const body=document.createElement('div'); body.className='mg-body';
+      const body = document.createElement('div'); body.className='mg-body';
 
       if(!newGrp){
-        const ts=document.createElement('div'); ts.className='ts-hover';
-        ts.textContent=pad(dt.getHours())+':'+pad(dt.getMinutes()); body.appendChild(ts);
+        const ts = document.createElement('div'); ts.className='ts-hover';
+        ts.textContent = pad(dt.getHours())+':'+pad(dt.getMinutes()); body.appendChild(ts);
       }
 
       if(newGrp){
-        const hdr=document.createElement('div'); hdr.className='mg-hdr';
-        const nm=document.createElement('span'); nm.className='mg-name'+(m.isAdmin?' adm':'');
-        nm.textContent=m.pseudo||'Membre'; hdr.appendChild(nm);
+        const hdr = document.createElement('div'); hdr.className='mg-hdr';
+        const nm = document.createElement('span'); nm.className='mg-name'+(m.isAdmin?' adm':'');
+        nm.textContent = m.pseudo||'Membre'; hdr.appendChild(nm);
         if(m.isAdmin){ const bd=document.createElement('span'); bd.className='mg-badge'; bd.textContent='Admin'; hdr.appendChild(bd); }
-        const ts=document.createElement('span'); ts.className='mg-time';
-        ts.textContent="Aujourd'hui à "+pad(dt.getHours())+':'+pad(dt.getMinutes()); hdr.appendChild(ts);
+        const ts = document.createElement('span'); ts.className='mg-time';
+        ts.textContent = "Aujourd'hui à "+pad(dt.getHours())+':'+pad(dt.getMinutes()); hdr.appendChild(ts);
         body.appendChild(hdr);
       }
 
       if(m.img){
-        const img=document.createElement('img'); img.className='msg-img';
+        const img = document.createElement('img'); img.className='msg-img';
         img.src=m.img; img.loading='lazy';
-        img.onclick=()=>{ $('lb-img').src=m.img; $('lb').classList.add('open'); };
+        img.onclick = ()=>{ $('lb-img').src=m.img; $('lb').classList.add('open'); };
         body.appendChild(img);
       } else {
-        const txt=document.createElement('div'); txt.className='msg-text'; txt.textContent=m.text||''; body.appendChild(txt);
+        const txt = document.createElement('div'); txt.className='msg-text'; txt.textContent=m.text||''; body.appendChild(txt);
       }
       g.appendChild(body);
 
       if(isAdmin){
-        const del=document.createElement('div'); del.className='mg-del';
-        const btn=document.createElement('button'); btn.className='del-btn'; btn.innerHTML='🗑️'; btn.title='Supprimer';
-        btn.onclick=()=>window._fb.remove(window._fb.ref(window._fb.db,'chat/'+key));
+        const del = document.createElement('div'); del.className='mg-del';
+        const btn = document.createElement('button'); btn.className='del-btn'; btn.innerHTML='🗑️'; btn.title='Supprimer';
+        btn.onclick = ()=>window._fb.remove(window._fb.ref(window._fb.db,'chat/'+key));
         del.appendChild(btn); g.appendChild(del);
       }
 
@@ -1398,54 +1547,60 @@ function startChat(){
       lastUid=m.uid; lastTs=m.ts;
     });
 
-    if(atBottom) setTimeout(()=>wrap.scrollTop=wrap.scrollHeight,60);
+    if(atBottom) setTimeout(()=>wrap.scrollTop=wrap.scrollHeight, 60);
   });
 }
 
 async function sendMsg(){
   if(!me && !isAdmin){ openModal('login'); _afterLogin='chat'; return; }
-  const {db,ref,push}=window._fb;
-  const inp=$('msg-input'), txt=inp.value.trim();
+  const {db, ref, push} = window._fb;
+  const inp = $('msg-input'), txt = inp.value.trim();
   if(!txt && !pendingImg) return;
 
-  const p={uid:me?me.uid:'admin',pseudo:isAdmin?'Admin':myPseudo,ts:Date.now()};
+  const p = {uid:me?me.uid:'admin', pseudo:isAdmin?'Admin':myPseudo, ts:Date.now()};
   if(isAdmin) p.isAdmin=true;
 
   if(pendingImg){
-    if(pendingImg.data.length>900000){ toast('Image trop lourde (max ~600KB) 📦','e'); return; }
-    p.img=pendingImg.data; cancelImg();
-  } else { p.text=filterBW(txt); inp.value=''; $('send-btn').classList.remove('ready'); }
+    if(pendingImg.data.length > 900000){ toast('Image trop lourde (max ~600KB) 📦','e'); return; }
+    p.img = pendingImg.data; cancelImg();
+  } else {
+    p.text = filterBW(txt); inp.value=''; $('send-btn').classList.remove('ready');
+  }
 
   try{ await push(ref(db,'chat'),p); }
   catch(e){ toast('Erreur envoi 😕','e'); }
 }
 
-$('msg-input').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();} });
-$('msg-input').addEventListener('input',e=>{ $('send-btn').classList.toggle('ready',e.target.value.trim().length>0||!!pendingImg); });
+$('msg-input').addEventListener('keydown', e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();} });
+$('msg-input').addEventListener('input',   e=>{ $('send-btn').classList.toggle('ready', e.target.value.trim().length>0||!!pendingImg); });
 
 /* ══════════════════════════
    IMAGE
 ══════════════════════════ */
 function handleImg(input){
-  const file=input.files[0]; if(!file) return;
+  const file = input.files[0]; if(!file) return;
   if(!file.type.startsWith('image/')){ toast('Fichier non supporté 🖼️','e'); input.value=''; return; }
-  if(file.size>800*1024){ toast('Image trop lourde (max 800KB) 📦','e'); input.value=''; return; }
-  const r=new FileReader();
-  r.onload=e=>{ pendingImg={data:e.target.result,name:file.name}; $('preview-thumb').src=e.target.result; $('preview-name').textContent=file.name; $('img-preview').classList.add('show'); $('send-btn').classList.add('ready'); };
+  if(file.size > 800*1024){ toast('Image trop lourde (max 800KB) 📦','e'); input.value=''; return; }
+  const r = new FileReader();
+  r.onload = e=>{
+    pendingImg={data:e.target.result, name:file.name};
+    $('preview-thumb').src=e.target.result; $('preview-name').textContent=file.name;
+    $('img-preview').classList.add('show'); $('send-btn').classList.add('ready');
+  };
   r.readAsDataURL(file); input.value='';
 }
 function cancelImg(){
   pendingImg=null; $('img-preview').classList.remove('show'); $('preview-thumb').src='';
-  $('send-btn').classList.toggle('ready',$('msg-input').value.trim().length>0);
+  $('send-btn').classList.toggle('ready', $('msg-input').value.trim().length>0);
 }
 
 /* ══════════════════════════
    MUSIC
 ══════════════════════════ */
 function toggleMusic(){
-  const a=$('bg-audio'),btn=$('m-play'),ico=$('m-note');
-  if(musicOn){ a.pause();btn.textContent='▶';ico.classList.add('paused');musicOn=false; }
-  else { a.play().catch(()=>toast("Clique d'abord sur la page 🔊")); btn.textContent='⏸';ico.classList.remove('paused');musicOn=true; }
+  const a=$('bg-audio'), btn=$('m-play'), ico=$('m-note');
+  if(musicOn){ a.pause(); btn.textContent='▶'; ico.classList.add('paused'); musicOn=false; }
+  else { a.play().catch(()=>toast("Clique d'abord sur la page 🔊")); btn.textContent='⏸'; ico.classList.remove('paused'); musicOn=true; }
 }
 
 /* ══════════════════════════
@@ -1455,19 +1610,19 @@ function admTab(name, btn){
   document.querySelectorAll('.adm-section').forEach(s=>s.classList.remove('show'));
   document.querySelectorAll('.adm-item').forEach(b=>b.classList.remove('active'));
   $('adm-'+name).classList.add('show'); btn.classList.add('active');
-  if(name==='members') loadMembers();
+  if(name==='members')  loadMembers();
   if(name==='chat-adm') loadAdminChat();
 }
 
 function loadAdminData(){
-  const {db,ref,onValue}=window._fb;
-  onValue(ref(db,'settings/music'),s=>{ if(s.exists()&&$('music-url')) $('music-url').value=s.val()||''; });
-  onValue(ref(db,'settings/video'),s=>{ if(s.exists()&&$('yt-url')) $('yt-url').value=s.val()||''; });
-  onValue(ref(db,'settings/logo'),s=>{ if(s.exists()&&$('logo-url')) $('logo-url').value=s.val()||''; });
+  const {db, ref, onValue} = window._fb;
+  onValue(ref(db,'settings/music'), s=>{ if(s.exists()&&$('music-url')) $('music-url').value=s.val()||''; });
+  onValue(ref(db,'settings/video'), s=>{ if(s.exists()&&$('yt-url'))    $('yt-url').value=s.val()||''; });
+  onValue(ref(db,'settings/logo'),  s=>{ if(s.exists()&&$('logo-url'))  $('logo-url').value=s.val()||''; });
 }
 
 async function saveHome(){
-  const {db,ref,set}=window._fb;
+  const {db, ref, set} = window._fb;
   await set(ref(db,'settings/homepage'),{
     title:$('adm-title').value, subtitle:$('adm-sub').value,
     joinUrl:$('adm-url').value, criteria:$('adm-criteria').value
@@ -1476,59 +1631,70 @@ async function saveHome(){
 }
 
 async function loadMembers(){
-  const {db,ref,get,remove}=window._fb;
-  const snap=await get(ref(db,'users'));
-  const tbody=$('mem-tbody'); tbody.innerHTML='';
+  const {db, ref, get} = window._fb;
+  const snap = await get(ref(db,'users'));
+  const tbody = $('mem-tbody'); tbody.innerHTML='';
   if(!snap.exists()){ tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--faint);padding:20px">Aucun membre</td></tr>'; return; }
   Object.entries(snap.val()).forEach(([uid,u])=>{
-    const tr=document.createElement('tr');
-    const date=u.createdAt?new Date(u.createdAt).toLocaleDateString('fr-FR'):'—';
+    const tr = document.createElement('tr');
+    const date = u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '—';
     tr.innerHTML=`<td><span class="mem-av-sm">${(u.pseudo||'?')[0].toUpperCase()}</span>${esc(u.pseudo||'—')}</td><td style="color:var(--dim)">${esc(u.email||'—')}</td><td style="color:var(--faint)">${date}</td><td><button class="btn btn-danger btn-sm" onclick="delMember('${uid}',this)">🗑️</button></td>`;
     tbody.appendChild(tr);
   });
 }
-async function delMember(uid,btn){
+
+async function delMember(uid, btn){
   if(!confirm('Supprimer ce membre ?')) return;
   await window._fb.remove(window._fb.ref(window._fb.db,'users/'+uid));
   btn.closest('tr').remove(); toast('Membre supprimé');
 }
 
 // Bad words
-let bwLocal=[];
-function renderBW(){ const l=$('bw-list'); l.innerHTML=bwLocal.map((w,i)=>`<div class="bw-item"><span>${esc(w)}</span><button class="btn btn-danger btn-sm" onclick="bwLocal.splice(${i},1);renderBW()">✕</button></div>`).join(''); }
-window._fb.onValue && (() => { window._fb.onValue(window._fb.ref(window._fb.db,'settings/badwords'),s=>{ bwLocal=s.exists()?(s.val()||[]):[]; renderBW(); }); })();
-function addBW(){ const v=$('bw-input').value.trim().toLowerCase(); if(!v||bwLocal.includes(v)) return; bwLocal.push(v); renderBW(); $('bw-input').value=''; }
-async function saveBW(){ await window._fb.set(window._fb.ref(window._fb.db,'settings/badwords'),bwLocal); flash('bw-flash'); }
+function renderBW(){
+  const l = $('bw-list');
+  l.innerHTML = bwLocal.map((w,i)=>`<div class="bw-item"><span>${esc(w)}</span><button class="btn btn-danger btn-sm" onclick="bwLocal.splice(${i},1);renderBW()">✕</button></div>`).join('');
+}
+
+function addBW(){
+  const v = $('bw-input').value.trim().toLowerCase();
+  if(!v || bwLocal.includes(v)) return;
+  bwLocal.push(v); renderBW(); $('bw-input').value='';
+}
+
+async function saveBW(){
+  await window._fb.set(window._fb.ref(window._fb.db,'settings/badwords'), bwLocal);
+  flash('bw-flash');
+}
 
 // Media upload
 function uploadMedia(input, type){
-  const file=input.files[0]; if(!file) return;
+  const file = input.files[0]; if(!file) return;
   const isAudio=type==='music', isImg=type==='logo';
-  const maxMB=4;
   if(isAudio && !file.type.startsWith('audio/')){ toast('Fichier audio invalide 🎵','e'); input.value=''; return; }
-  if(isImg && !file.type.startsWith('image/')){ toast('Fichier image invalide 🖼️','e'); input.value=''; return; }
+  if(isImg   && !file.type.startsWith('image/')){ toast('Fichier image invalide 🖼️','e'); input.value=''; return; }
   if(!isAudio && !isImg && !file.type.startsWith('video/')){ toast('Fichier vidéo invalide 🎮','e'); input.value=''; return; }
-  if(file.size > maxMB*1024*1024){ toast(`Trop lourd ! Max ${maxMB}MB`,'e'); input.value=''; return; }
+  if(file.size > 4*1024*1024){ toast('Trop lourd ! Max 4MB','e'); input.value=''; return; }
 
   const prog=$(type+'-prog'), bar=$(type+'-bar-prog'), lbl=$(type+'-lbl');
   prog.classList.add('show'); bar.style.width='0%'; lbl.textContent='Chargement…';
 
-  const r=new FileReader();
-  r.onprogress=e=>{ if(e.lengthComputable){ const p=Math.round(e.loaded/e.total*85); bar.style.width=p+'%'; lbl.textContent=p+'%…'; } };
-  r.onload=async e=>{
+  const r = new FileReader();
+  r.onprogress = e=>{ if(e.lengthComputable){ const p=Math.round(e.loaded/e.total*85); bar.style.width=p+'%'; lbl.textContent=p+'%…'; } };
+  r.onload = async e=>{
     bar.style.width='92%'; lbl.textContent='Envoi…';
-    try{
+    try {
       await window._fb.set(window._fb.ref(window._fb.db,'settings/'+type), e.target.result);
       bar.style.width='100%'; lbl.textContent='✅ En ligne !';
       setTimeout(()=>prog.classList.remove('show'), 1200);
       flash(type+'-flash');
     } catch(err){ lbl.textContent='❌ Erreur : '+err.message; toast('Erreur upload','e'); }
   };
-  r.onerror=()=>{ lbl.textContent='❌ Erreur lecture'; toast('Erreur fichier','e'); };
+  r.onerror = ()=>{ lbl.textContent='❌ Erreur lecture'; toast('Erreur fichier','e'); };
   r.readAsDataURL(file); input.value='';
 }
+
 async function saveMusicUrl(){ const u=$('music-url').value.trim(); if(!u) return; await window._fb.set(window._fb.ref(window._fb.db,'settings/music'),u); flash('music-flash'); }
-async function saveLogoUrl(){ const u=$('logo-url').value.trim(); if(!u) return; await window._fb.set(window._fb.ref(window._fb.db,'settings/logo'),u); flash('logo-flash'); }
+async function saveLogoUrl(){  const u=$('logo-url').value.trim();  if(!u) return; await window._fb.set(window._fb.ref(window._fb.db,'settings/logo'),u);  flash('logo-flash'); }
 async function saveYT(){
   const u=$('yt-url').value.trim(); if(!u) return;
   if(!u.includes('youtube')&&!u.includes('youtu.be')){ toast('URL YouTube invalide','e'); return; }
@@ -1536,21 +1702,29 @@ async function saveYT(){
 }
 async function removeMedia(type){ await window._fb.remove(window._fb.ref(window._fb.db,'settings/'+type)); toast(type+' retiré 🗑️'); }
 
-async function clearChat(){ await window._fb.remove(window._fb.ref(window._fb.db,'chat')); flash('chat-flash'); $('adm-chat-list').innerHTML=''; }
+async function clearChat(){
+  await window._fb.remove(window._fb.ref(window._fb.db,'chat'));
+  flash('chat-flash'); $('adm-chat-list').innerHTML='';
+}
+
 async function loadAdminChat(){
-  const snap=await window._fb.get(window._fb.ref(window._fb.db,'chat'));
-  const l=$('adm-chat-list'); l.innerHTML='';
+  const snap = await window._fb.get(window._fb.ref(window._fb.db,'chat'));
+  const l = $('adm-chat-list'); l.innerHTML='';
   if(!snap.exists()){ l.innerHTML='<p style="color:var(--faint);font-size:.83rem">Aucun message</p>'; return; }
   Object.entries(snap.val()).sort(([,a],[,b])=>a.ts-b.ts).forEach(([key,m])=>{
-    const d=document.createElement('div'); d.className='bw-item';
+    const d = document.createElement('div'); d.className='bw-item';
     d.innerHTML=`<span><strong style="color:var(--gold)">${esc(m.pseudo||'?')}</strong> — ${esc((m.text||'[image]').substring(0,60))}</span><button class="btn btn-danger btn-sm" onclick="window._fb.remove(window._fb.ref(window._fb.db,'chat/${key}'));this.closest('.bw-item').remove()">🗑️</button>`;
     l.appendChild(d);
   });
 }
 
-// Init bw listener immediately
-window.addEventListener('load',()=>{
-  window._fb.onValue(window._fb.ref(window._fb.db,'settings/badwords'),s=>{ bwLocal=s.exists()?(s.val()||[]):[]; renderBW(); });
+// Init bad words listener
+window.addEventListener('load', ()=>{
+  window._fb.onValue(window._fb.ref(window._fb.db,'settings/badwords'), s=>{
+    bwLocal = s.exists() ? (s.val()||[]) : []; renderBW();
+  });
+  // Init chat UI selon état auth
+  initChatUI();
 });
 </script>
 </body>
