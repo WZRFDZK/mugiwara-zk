@@ -899,6 +899,45 @@ footer {
 .footer-link:hover { color: var(--gold); }
 .footer-copy { font-size: 0.8rem; color: var(--muted); opacity: 0.6; }
 
+
+/* ═══════════════════════════════════════════
+   SETTINGS MODAL
+═══════════════════════════════════════════ */
+#settings-overlay .modal-title { color: var(--cyan); }
+.settings-pseudo-wrap {
+  display: flex; gap: 8px; align-items: center;
+}
+.settings-pseudo-wrap .form-input { flex: 1; }
+#settings-save-btn {
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--cyan), #00a8b5);
+  color: var(--bg-deep);
+  font-weight: 700; font-size: 0.95rem;
+  border: none; cursor: pointer;
+  transition: all 0.2s;
+  width: 100%; margin-top: 8px;
+}
+#settings-save-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px var(--cyan-glow);
+}
+#nav-settings-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border-cyan);
+  color: var(--cyan);
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  background: rgba(0,245,255,0.05);
+}
+#nav-settings-btn:hover {
+  background: rgba(0,245,255,0.15);
+  box-shadow: 0 0 12px var(--cyan-glow);
+  transform: rotate(45deg);
+}
+
 /* ═══════════════════════════════════════════
    TOAST
 ═══════════════════════════════════════════ */
@@ -948,6 +987,7 @@ footer {
     </div>
     <div id="nav-user-info">
       <span id="nav-pseudo"></span>
+      <button id="nav-settings-btn" title="Paramètres" onclick="openSettings()">⚙️</button>
       <button id="nav-logout-btn" class="nav-btn" onclick="logout()">Déconnexion</button>
     </div>
   </div>
@@ -1295,6 +1335,26 @@ footer {
   </div>
 </div>
 
+<!-- ═══ MODAL — PARAMÈTRES ═══ -->
+<div class="modal-overlay" id="settings-overlay" onclick="if(event.target===this)closeModal('settings-overlay')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('settings-overlay')">✕</button>
+    <div class="modal-icon">⚙️</div>
+    <div class="modal-title">Paramètres</div>
+    <div class="modal-sub">Modifie ton profil de crew</div>
+    <div class="form-group">
+      <label class="form-label">Pseudo actuel</label>
+      <div style="padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--radius);color:var(--muted);font-size:0.95rem" id="settings-current-pseudo">—</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nouveau pseudo</label>
+      <input class="form-input" type="text" id="settings-new-pseudo" placeholder="Ton nouveau pseudo" maxlength="20">
+      <div class="form-error" id="settings-error"></div>
+    </div>
+    <button id="settings-save-btn" onclick="saveNewPseudo()">💾 Sauvegarder</button>
+  </div>
+</div>
+
 <!-- ═══ TOAST ═══ -->
 <div id="toast"></div>
 
@@ -1634,6 +1694,47 @@ window.clearChat = async function() {
     for (const d of snap.docs) await deleteDoc(d.ref);
     showToast('Chat vidé !', 'success');
   } catch (e) { showToast('Erreur', 'error'); }
+};
+
+
+window.openSettings = function() {
+  const user = window._currentUser;
+  if (!user) return;
+  document.getElementById('settings-current-pseudo').textContent = user._pseudo || user.displayName || '—';
+  document.getElementById('settings-new-pseudo').value = '';
+  document.getElementById('settings-error').style.display = 'none';
+  openModal('settings-overlay');
+};
+
+window.saveNewPseudo = async function() {
+  const newPseudo = document.getElementById('settings-new-pseudo').value.trim();
+  const errEl = document.getElementById('settings-error');
+  errEl.style.display = 'none';
+  if (!newPseudo) { showError(errEl, 'Entre un pseudo.'); return; }
+  if (newPseudo.length < 2) { showError(errEl, 'Pseudo trop court (min. 2 caractères).'); return; }
+  if (!window._currentUser) return;
+  const btn = document.getElementById('settings-save-btn');
+  btn.textContent = 'Sauvegarde…';
+  btn.disabled = true;
+  try {
+    const db = window._db;
+    const { doc, updateDoc } = window._firestore;
+    const { updateProfile } = window._firebase;
+    // Mettre à jour dans Firestore
+    await updateDoc(doc(db, 'users', window._currentUser.uid), { pseudo: newPseudo });
+    // Mettre à jour le displayName Firebase Auth
+    await updateProfile(window._currentUser, { displayName: newPseudo });
+    // Mettre à jour localement
+    window._currentUser._pseudo = newPseudo;
+    document.getElementById('nav-pseudo').textContent = newPseudo;
+    document.getElementById('settings-current-pseudo').textContent = newPseudo;
+    closeModal('settings-overlay');
+    showToast('Pseudo changé en ' + newPseudo + ' !', 'success');
+  } catch(e) {
+    showError(errEl, 'Erreur lors de la sauvegarde.');
+  }
+  btn.textContent = '💾 Sauvegarder';
+  btn.disabled = false;
 };
 
 window.editPseudo = function(uid) {
