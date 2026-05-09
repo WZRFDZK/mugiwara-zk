@@ -1330,8 +1330,22 @@ window._db = db;
 window._firebase = { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile };
 window._firestore = { collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, deleteDoc, getDocs, getDoc, doc, setDoc, updateDoc };
 
-onAuthStateChanged(auth, (user) => {
-  window._currentUser = user || null;
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        user._pseudo = userDoc.data().pseudo || user.displayName || user.email.split('@')[0];
+      } else {
+        user._pseudo = user.displayName || user.email.split('@')[0];
+      }
+    } catch(e) {
+      user._pseudo = user.displayName || user.email.split('@')[0];
+    }
+    window._currentUser = user;
+  } else {
+    window._currentUser = null;
+  }
   updateNavUI(user);
   updateChatUI(user);
 });
@@ -1393,11 +1407,18 @@ function renderAdminMembers(members) {
   if (!el) return;
   if (!members.length) { el.innerHTML = '<p style="color:var(--muted);font-size:0.9rem">Aucun membre.</p>'; return; }
   el.innerHTML = `<table class="admin-table">
-    <tr><th>Pseudo</th><th>Email</th><th>Inscrit le</th></tr>
+    <tr><th>Pseudo</th><th>Email</th><th>Inscrit le</th><th>Action</th></tr>
     ${members.map(m => `<tr>
-      <td>${escHtml(m.pseudo||'—')}</td>
+      <td>
+        <span id="pseudo-display-${m.id}">${escHtml(m.pseudo||'—')}</span>
+        <input id="pseudo-input-${m.id}" class="form-input" style="display:none;width:120px;padding:4px 8px;font-size:0.8rem" value="${escHtml(m.pseudo||'')}">
+      </td>
       <td>${escHtml(m.email||'—')}</td>
       <td>${m.createdAt?.toDate ? m.createdAt.toDate().toLocaleDateString('fr') : '—'}</td>
+      <td style="display:flex;gap:6px">
+        <button class="admin-btn admin-btn-save" style="padding:4px 10px;font-size:0.75rem" onclick="editPseudo('${m.id}')">✏️</button>
+        <button class="admin-btn admin-btn-save" id="save-pseudo-${m.id}" style="padding:4px 10px;font-size:0.75rem;display:none" onclick="savePseudo('${m.id}')">💾</button>
+      </td>
     </tr>`).join('')}
   </table>`;
 }
@@ -1427,7 +1448,7 @@ function updateNavUI(user) {
   if (user) {
     authBtns.style.display = 'none';
     userInfo.style.display = 'flex';
-    pseudoEl.textContent = user.displayName || user.email.split('@')[0];
+    pseudoEl.textContent = user._pseudo || user.displayName || user.email.split('@')[0];
   } else {
     authBtns.style.display = 'flex';
     userInfo.style.display = 'none';
@@ -1499,7 +1520,7 @@ window.sendChatMessage = async function() {
   try {
     await addDoc(collection(db, 'messages'), {
       text,
-      pseudo: window._currentUser.displayName || 'Anonyme',
+      pseudo: window._currentUser._pseudo || window._currentUser.displayName || 'Anonyme',
       uid: window._currentUser.uid,
       timestamp: serverTimestamp()
     });
@@ -1601,6 +1622,25 @@ window.clearChat = async function() {
     for (const d of snap.docs) await deleteDoc(d.ref);
     showToast('Chat vidé !', 'success');
   } catch (e) { showToast('Erreur', 'error'); }
+};
+
+window.editPseudo = function(uid) {
+  document.getElementById('pseudo-display-' + uid).style.display = 'none';
+  document.getElementById('pseudo-input-' + uid).style.display = 'inline-block';
+  document.getElementById('save-pseudo-' + uid).style.display = 'inline-block';
+};
+
+window.savePseudo = async function(uid) {
+  const newPseudo = document.getElementById('pseudo-input-' + uid).value.trim();
+  if (!newPseudo) { showToast('Pseudo vide', 'error'); return; }
+  try {
+    await updateDoc(doc(db, 'users', uid), { pseudo: newPseudo });
+    document.getElementById('pseudo-display-' + uid).textContent = newPseudo;
+    document.getElementById('pseudo-display-' + uid).style.display = 'inline';
+    document.getElementById('pseudo-input-' + uid).style.display = 'none';
+    document.getElementById('save-pseudo-' + uid).style.display = 'none';
+    showToast('Pseudo mis à jour !', 'success');
+  } catch(e) { showToast('Erreur', 'error'); }
 };
 
 window.adminLogout = function() {
