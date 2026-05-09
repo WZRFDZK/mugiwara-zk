@@ -1478,9 +1478,22 @@ window.doLogin = async function() {
   errEl.style.display = 'none';
   if (!email || !pass) { showError(errEl, 'Remplis tous les champs.'); return; }
   try {
-    await signInWithEmailAndPassword(auth, email, pass);
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    // Charge le pseudo depuis Firestore
+    try {
+      const userDoc = await getDoc(doc(db, 'users', cred.user.uid));
+      if (userDoc.exists()) {
+        cred.user._pseudo = userDoc.data().pseudo || cred.user.displayName || email.split('@')[0];
+      } else {
+        cred.user._pseudo = cred.user.displayName || email.split('@')[0];
+      }
+    } catch(e) {
+      cred.user._pseudo = cred.user.displayName || email.split('@')[0];
+    }
+    window._currentUser = cred.user;
+    updateNavUI(cred.user);
     closeModal('login-overlay');
-    showToast('Bienvenue dans le crew !', 'success');
+    showToast('Bienvenue ' + cred.user._pseudo + ' !', 'success');
   } catch (e) {
     showError(errEl, firebaseErrorMsg(e.code));
   }
