@@ -774,7 +774,7 @@ footer { position: relative; z-index: 1; border-top: 1px solid var(--border); pa
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, deleteDoc, getDocs, getDoc, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBpzUawoPo61D1jN8fBEskrzKLOQqwjJl8",
@@ -796,7 +796,7 @@ window._db      = db;
 window._storage = storage;
 window._firebase       = { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile };
 window._firestore      = { collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, deleteDoc, getDocs, getDoc, doc, setDoc, updateDoc };
-window._storageUtils   = { ref, uploadBytes, getDownloadURL };
+window._storageUtils   = { ref, uploadBytesResumable, getDownloadURL };
 
 /* ── Auth state ── */
 onAuthStateChanged(auth, async (user) => {
@@ -1005,10 +1005,34 @@ window.logout = async function() {
   showToast('Déconnecté', 'success');
 };
 
-/* ════════════════════════════════════════════════════
-   ✅ ENVOI DE MESSAGE — upload rapide avec uploadBytes
-   ════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   ENVOI DE MESSAGE — vraie progression via uploadBytesResumable
+   ═══════════════════════════════════════════════════════════════ */
 window._pendingFile = null;
+
+function setInputsEnabled(enabled) {
+  document.getElementById('chat-input').disabled    = !enabled;
+  document.getElementById('chat-send').disabled     = !enabled;
+  document.getElementById('chat-attach-btn').disabled = !enabled;
+}
+
+function setProgressUI(pctValue, filename) {
+  const bar   = document.getElementById('chat-upload-bar');
+  const fill  = document.getElementById('upload-bar-fill');
+  const pct   = document.getElementById('upload-pct');
+  const fname = document.getElementById('upload-file-name');
+  if (pctValue === null) {
+    /* cacher */
+    bar.classList.remove('active');
+    fill.style.width = '0%';
+    pct.textContent  = '0%';
+    return;
+  }
+  bar.classList.add('active');
+  if (filename) fname.textContent = filename;
+  fill.style.width = pctValue + '%';
+  pct.textContent  = Math.round(pctValue) + '%';
+}
 
 window.sendChatMessage = async function() {
   const input   = document.getElementById('chat-input');
@@ -1018,14 +1042,8 @@ window.sendChatMessage = async function() {
   if (!text && !pending) return;
   if (!window._currentUser) return;
 
-  /* Désactiver les contrôles pendant l'envoi */
-  const sendBtn   = document.getElementById('chat-send');
-  const attachBtn = document.getElementById('chat-attach-btn');
-  input.value       = '';
-  input.disabled    = true;
-  sendBtn.disabled  = true;
-  attachBtn.disabled = true;
-
+  input.value = '';
+  setInputsEnabled(false);
   cancelImagePreview();
 
   const msgData = {
@@ -1037,77 +1055,60 @@ window.sendChatMessage = async function() {
   };
 
   if (pending) {
-    /* ── UI de progression ── */
-    const bar   = document.getElementById('chat-upload-bar');
-    const fill  = document.getElementById('upload-bar-fill');
-    const pct   = document.getElementById('upload-pct');
-    const fname = document.getElementById('upload-file-name');
+    const file = pending.file;
+    const ext  = file.name.includes('.') ? file.name.split('.').pop() : 'bin';
+    const path = `chat/${window._currentUser.uid}/${Date.now()}_${file.name}`;
+    const sRef = ref(storage, path);
 
-    bar.classList.add('active');
-    fname.textContent = pending.file.name;
-    fill.style.width  = '0%';
-    pct.textContent   = '0%';
-
-    /* Progression simulée fluide : 0 → 90 % pendant l'upload */
-    let progress = 0;
-    const fakeTimer = setInterval(() => {
-      /* accélère au début, ralentit vers 90 */
-      const step = progress < 60 ? Math.random() * 16 : Math.random() * 5;
-      progress = Math.min(progress + step, 90);
-      fill.style.width = progress + '%';
-      pct.textContent  = Math.round(progress) + '%';
-    }, 100);
+    setProgressUI(0, file.name);
 
     try {
-      /* ✅ uploadBytes = 1 seul appel HTTP fiable, pas de WebSocket bloquant */
-      const ext  = pending.file.name.split('.').pop() || 'bin';
-      const path = `chat/${window._currentUser.uid}/${Date.now()}.${ext}`;
-      const sRef = ref(storage, path);
+      const downloadURL = await new Promise((resolve, reject) => {
+        const task = uploadBytesResumable(sRef, file, { contentType: file.type });
 
-      await uploadBytes(sRef, pending.file);
+        task.on('state_changed',
+          /* ── progression réelle octet par octet ── */
+          (snapshot) => {
+            const p = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setProgressUI(p, file.name);
+          },
+          /* ── erreur ── */
+          (err) => reject(err),
+          /* ── terminé ── */
+          async () => {
+            setProgressUI(100, file.name);
+            try { resolve(await getDownloadURL(task.snapshot.ref)); }
+            catch(e) { reject(e); }
+          }
+        );
+      });
 
-      /* 100 % → masquer après 400 ms */
-      clearInterval(fakeTimer);
-      fill.style.width = '100%';
-      pct.textContent  = '100%';
-
-      const downloadURL = await getDownloadURL(sRef);
       msgData.fileUrl  = downloadURL;
-      msgData.fileType = pending.file.type;
-      msgData.fileName = pending.file.name;
+      msgData.fileType = file.type;
+      msgData.fileName = file.name;
 
-      setTimeout(() => {
-        bar.classList.remove('active');
-        fill.style.width = '0%';
-      }, 400);
+      /* masquer la barre après 500 ms */
+      setTimeout(() => setProgressUI(null), 500);
 
     } catch(e) {
-      clearInterval(fakeTimer);
-      bar.classList.remove('active');
-      fill.style.width = '0%';
+      setProgressUI(null);
       showToast('Erreur upload : ' + (e.message || e.code || 'inconnue'), 'error');
       window._pendingFile = null;
-      /* Réactiver les contrôles en cas d'erreur */
-      input.disabled    = false;
-      sendBtn.disabled  = false;
-      attachBtn.disabled = false;
+      setInputsEnabled(true);
       return;
     }
 
     window._pendingFile = null;
   }
 
-  /* ── Envoyer le message Firestore ── */
+  /* ── Envoyer dans Firestore ── */
   try {
     await addDoc(collection(db, 'messages'), msgData);
   } catch(e) {
-    showToast('Erreur d\'envoi', 'error');
+    showToast('Erreur d\'envoi du message', 'error');
   }
 
-  /* Réactiver les contrôles */
-  input.disabled    = false;
-  sendBtn.disabled  = false;
-  attachBtn.disabled = false;
+  setInputsEnabled(true);
   input.focus();
 };
 
